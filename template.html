@@ -8,7 +8,7 @@
     <style>
         :root { --bg: #f4f5f7; --text: #1d1d1f; --text-muted: #86868b; --card-bg: #ffffff; --accent: #007aff; --radius: 20px; --border-color: rgba(0, 0, 0, 0.08); --glass-bg: rgba(244, 245, 247, 0.85); --modal-bg: #ffffff; --input-bg: #ffffff; }
         [data-theme="dark"] { --bg: #000000; --text: #f5f5f7; --text-muted: #a1a1a6; --card-bg: #1c1c1e; --border-color: rgba(255, 255, 255, 0.15); --glass-bg: rgba(28, 28, 30, 0.85); --modal-bg: #1c1c1e; --input-bg: #2c2c2e; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
         body { background: var(--bg); color: var(--text); padding-bottom: 100px; -webkit-tap-highlight-color: transparent; transition: 0.3s; }
         body.modal-open { overflow: hidden; touch-action: none; }
         .container { max-width: 480px; margin: 0 auto; position: relative; min-height: 100vh; background: var(--bg); box-shadow: 0 0 20px rgba(0,0,0,0.05); }
@@ -33,7 +33,7 @@
         
         .footer { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: max-content; background: var(--glass-bg); backdrop-filter: blur(15px); padding: 12px 18px; display: flex; gap: 12px; border-radius: 40px; border: 1px solid var(--border-color); z-index: 100; transition: 0.4s; }
         body.search-focused .footer { transform: translate(-50%, 120px); opacity: 0; pointer-events: none; }
-        .action-btn { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; border: none; cursor: pointer; color: #fff; overflow: hidden; }
+        .action-btn { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; border: none; cursor: pointer; color: #fff; overflow: hidden;}
         .btn-phone { background: linear-gradient(135deg, #34c759, #28a745); } .btn-vk { background: linear-gradient(135deg, #0077FF, #005ce6); } .btn-tg { background: linear-gradient(135deg, #2AABEE, #229ED9); } .btn-wa { background: linear-gradient(135deg, #25D366, #128C7E); } .btn-share { background: linear-gradient(135deg, #AF52DE, #5856D6); } 
         .action-btn svg { width: 22px; height: 22px; fill: currentColor; }
         
@@ -63,8 +63,8 @@
     
     <div id="blockScreen">
         <svg viewBox="0 0 24 24" width="60" height="60" fill="#ff3b30" style="margin-bottom:20px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-        <h2 style="margin-bottom:10px;">Визитка временно недоступна</h2>
-        <p style="color:var(--text-muted);">Пожалуйста, свяжитесь с владельцем.</p>
+        <h2 style="margin-bottom:10px;">Визитка недоступна</h2>
+        <p style="color:var(--text-muted);">Свяжитесь с владельцем.</p>
     </div>
 
     <div class="container" style="opacity: 0; transition: 0.5s;" id="mainContainer">
@@ -89,9 +89,7 @@
         </div>
         <div class="services" id="servicesList"></div>
 
-        <footer class="footer" id="mainFooter">
-            <!-- Кнопки загружаются скриптом динамически -->
-        </footer>
+        <footer class="footer" id="mainFooter"></footer>
 
         <div class="modal-overlay" id="serviceModalOverlay">
             <div class="modal" id="serviceModal">
@@ -142,9 +140,7 @@
                 document.title = db.name;
                 initApp();
             })
-            .catch(() => {
-                document.getElementById('loader').innerHTML = 'Визитка не найдена.';
-            });
+            .catch(() => { document.getElementById('loader').innerHTML = 'Визитка не найдена.'; });
 
         let currentFilter = 'Все';
 
@@ -165,7 +161,7 @@
             if(db.vk) footer.innerHTML += `<a href="https://vk.com/${db.vk}" target="_blank" class="action-btn btn-vk"><svg viewBox="0 0 24 24"><path d="M15.08 2.37A11.75 11.75 0 0 0 12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10c0-1.07-.17-2.1-.48-3.1.28.32.48.74.48 1.1A10 10 0 1 1 12 2a9.9 9.9 0 0 1 3.08.49V2.37z" opacity=".2"/><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12s4.48 10 10 10 10-4.48 10-10zm-6.62 1.48c.17.2.35.4.52.6.48.57 1 1.15 1.5 1.76.12.15.2.3.26.47.04.1-.03.22-.16.22h-1.93c-.47 0-.82-.2-1.1-.55-.38-.47-.78-.93-1.14-1.42-.12-.15-.27-.22-.44-.15-.43.15-.65.48-.65.94v.93c0 .16-.1.25-.26.25h-1.28c-1.6 0-3-.55-4.2-1.6-1.52-1.35-2.6-3.08-3.37-5-.06-.15.02-.25.17-.25h2c.1 0 .17.06.22.16.53 1.43 1.25 2.7 2.3 3.7.15.15.3.18.45.06.18-.16.27-.4.27-.66V9.8c0-.28.16-.4.4-.4h2.18c.23 0 .33.1.33.32v2.58c0 .32.14.47.38.4.15-.05.28-.15.4-.26.4-.45.76-.94 1.1-1.44.13-.18.3-.25.5-.25h1.9c.14 0 .22.06.2.2-.07.2-.18.4-.3.6-.45.6-.9 1.18-1.35 1.76-.23.27-.23.53.03.8z"/></svg></a>`;
             if(db.tg) footer.innerHTML += `<a href="https://t.me/${db.tg}" target="_blank" class="action-btn btn-tg"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.46.93-4.12 2.73-.39.26-.74.39-1.06.38-.35-.01-1.02-.2-1.52-.36-.61-.2-1.1-.3-1.07-.63.02-.17.26-.35.73-.54 2.86-1.24 4.76-2.06 5.71-2.46 2.72-1.14 3.28-1.34 3.65-1.35.08 0 .26.02.37.1.09.07.13.17.15.28 0 .04.01.12 0 .28z"/></svg></a>`;
             
-            if(db.customLinks) {
+            if(db.customLinks && db.customLinks.length > 0) {
                 db.customLinks.forEach(link => {
                     footer.innerHTML += `<a href="${link.url}" target="_blank" class="action-btn" style="background:#fff;"><img src="${link.icon}" style="width:100%; height:100%; object-fit:cover;"></a>`;
                 });
@@ -173,6 +169,7 @@
             
             footer.innerHTML += `<button class="action-btn btn-share" onclick="shareProfile()"><svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg></button>`;
 
+            // ИСПРАВЛЕННЫЙ ФИЛЬТР: Только те категории, где реально есть услуги
             const usedCategories = [...new Set(db.services.map(s => s.category))];
             const catBox = document.getElementById('categoriesBox');
             catBox.innerHTML = '<button class="cat-btn active" data-filter="Все">Все</button>';
@@ -202,7 +199,7 @@
             });
 
             if (filtered.length === 0) {
-                list.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Ничего не найдено <br><a href="#" onclick="document.getElementById(\'searchInput\').value=\'\'; document.querySelector(\'.cat-btn[data-filter=\\\'Все\\\']\').click();" style="color:var(--accent); text-decoration:none;">Очистить поиск</a></p>';
+                list.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Ничего не найдено <br><a href="#" onclick="document.getElementById(\'searchInput\').value=\'\'; document.querySelector(\'.cat-btn[data-filter=\\\'Все\\\']\').click();" style="color:var(--accent); text-decoration:none;">Сбросить поиск</a></p>';
                 return;
             }
 
