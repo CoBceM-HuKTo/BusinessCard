@@ -8,7 +8,6 @@
         :root { --bg: #f4f5f7; --text: #1d1d1f; --accent: #007aff; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
         body { background: var(--bg); color: var(--text); -webkit-tap-highlight-color: transparent; }
-        
         .panel { max-width: 450px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .panel h2 { margin-bottom: 20px; text-align: center; }
         .input-group { margin-bottom: 15px; }
@@ -19,15 +18,12 @@
         .btn.secondary { background: #e5e5ea; color: #333; }
         .btn.success { background: #34c759; }
         .btn.dark { background: #1d1d1f; }
-        
         .split-auth { display: flex; gap: 10px; margin-bottom: 20px; }
         .auth-tab { flex: 1; padding: 10px; text-align: center; background: #f4f5f7; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px; color: #888; }
         .auth-tab.active { background: #007aff; color: #fff; }
-        
         #globalLoader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 9999; display: none; align-items: center; justify-content: center; flex-direction: column; }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        
         #dashboardView { display: none; padding: 20px; max-width: 600px; margin: 0 auto; padding-bottom: 100px; }
         .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .client-card { background: #fff; padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border: 1px solid #eee; cursor: pointer;}
@@ -37,26 +33,22 @@
         .status-badge.active { background: #e8f5e9; color: #2e7d32; }
         .status-badge.blocked { background: #ffebee; color: #c62828; }
         .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--accent); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 10px 20px rgba(0,122,255,0.3); border: none; cursor: pointer; z-index: 100;}
-        
         #editorView { display: none; padding-top: 80px; padding-bottom: 100px; max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; }
         .admin-topbar { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); width: calc(100% - 30px); max-width: 450px; background: rgba(255,255,255,0.85); backdrop-filter: blur(15px); padding: 8px 12px; border-radius: 20px; display: flex; gap: 8px; justify-content: space-between; box-shadow: 0 8px 25px rgba(0,0,0,0.08); z-index: 1000; border: 1px solid rgba(0,0,0,0.05); }
         .admin-btn { flex: 1; padding: 10px 5px; background: #f4f5f7; border: none; border-radius: 12px; font-size: 12px; font-weight: 600; cursor: pointer; color: #333; display:flex; align-items:center; justify-content:center; gap:5px;}
         .admin-btn.success { background: #34c759; color: #fff; }
-        
         [contenteditable="true"] { outline: 2px dashed #007aff !important; background: rgba(0,122,255,0.05); border-radius: 5px; padding: 2px; }
         .header { padding: 20px; text-align: center; }
         .avatar { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 4px solid var(--accent); cursor: pointer; }
         .name { font-size: 24px; font-weight: 700; margin-bottom: 5px; }
         .services { padding: 20px; display: grid; gap: 15px; }
         .card { background: #fff; padding: 20px; border-radius: 20px; border: 1px solid #eee; border-left: 5px solid var(--accent); }
-        
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; justify-content: center; z-index: 999; }
         .modal-overlay.active { display: flex; }
         .modal { background: #fff; width: 100%; max-width: 480px; border-radius: 30px 30px 0 0; padding: 25px 20px 30px; max-height: 90vh; overflow-y: auto; }
         .modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
         .modal-header h2 { font-size: 22px; margin: 0; }
         .modal-section { margin-bottom: 15px; background: var(--bg); padding: 15px; border-radius: 15px; }
-        
         #codeEditorView { display: none; padding: 20px; max-width: 800px; margin: 0 auto; height: 100vh; flex-direction: column; }
         #codeArea { flex: 1; width: 100%; padding: 15px; font-family: monospace; font-size: 13px; border: 1px solid #ddd; border-radius: 10px; resize: none; margin-bottom: 15px; background: #2b2b2b; color: #f8f8f2; }
     </style>
@@ -127,7 +119,6 @@
         </div>
     </div>
 
-    <!-- МОДАЛКИ (ОСТАВЛЕНЫ БЕЗ ИЗМЕНЕНИЙ ИЗ ПРОШЛОГО КОДА) -->
     <div class="modal-overlay" id="contactsModalOverlay">
         <div class="modal" style="border-radius:20px; padding:20px; margin:20px; max-width:400px; transform:translateY(0);">
             <h2 style="margin-bottom:15px;">Контакты и Ссылки</h2>
@@ -140,7 +131,7 @@
                 <label style="font-size:12px; color:#888; display:block; margin-bottom:5px;">Добавить новую ссылку</label>
                 <input type="text" id="newCustomUrl" placeholder="https://..." style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; margin-bottom:10px; outline:none;">
                 <input type="file" id="customIconUploader" accept="image/*,.svg" style="display:none" onchange="handleCustomIconUpload(event)">
-                <button class="btn dark" style="padding:10px; font-size:14px; margin:0;" onclick="document.getElementById('customIconUploader').click()">Выбрать иконку и добавить</button>
+                <button class="btn dark" style="padding:10px; font-size:14px; margin:0; width:100%;" onclick="document.getElementById('customIconUploader').click()">Выбрать иконку и добавить</button>
             </div>
             <div style="display:flex; gap:10px; margin-top:20px;">
                 <button class="btn secondary" onclick="closeModal('contactsModalOverlay')">Отмена</button>
@@ -184,26 +175,18 @@
     </div>
 
     <script>
-        // === ВСТАВЬТЕ СВОЙ ТОКЕН СЮДА ===
-        const SYSTEM_TOKEN = "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"; 
-        // ================================
-
         function utf8_to_b64(str) { return window.btoa(unescape(encodeURIComponent(str))); }
         function b64_to_utf8(str) { return decodeURIComponent(escape(window.atob(str))); }
         function showView(id) { document.querySelectorAll('#authView, #menuView, #dashboardView, #editorView, #codeEditorView').forEach(e => e.style.display='none'); document.getElementById(id).style.display = id==='codeEditorView'?'flex':'block'; }
         function showLoader(txt) { document.getElementById('loaderText').textContent = txt; document.getElementById('globalLoader').style.display = 'flex'; }
-        
-        // НОВАЯ ФУНКЦИЯ БЕЗОПАСНОГО СКРЫТИЯ ЛОАДЕРА (Броня от вечной загрузки)
-        function hideLoader() { 
-            setTimeout(() => { document.getElementById('globalLoader').style.display = 'none'; }, 200); 
-        }
-        
+        function hideLoader() { setTimeout(() => { document.getElementById('globalLoader').style.display = 'none'; }, 200); }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
         let activeMode = 'client'; 
         let currentId = null;
         let ghRepo = localStorage.getItem('ghRepo') || 'CoBceM-HuKTo/BusinessCard';
         let ghToken = localStorage.getItem('ghToken') || '';
+        let sessionClientToken = ''; // Временное хранилище токена для клиента
         let fileSha = null; let templateSha = null; let appData = {};
         let clientsRegistry = []; let registrySha = null; let actionClientId = null;
 
@@ -259,30 +242,17 @@
             return await res.json();
         }
 
-        // БРОНИРОВАННЫЙ ВХОД В ДАШБОРД (Перехват любых ошибок)
         async function openDashboard() {
             showLoader("Загрузка базы клиентов...");
             try {
                 const res = await githubReq('GET', 'clients.json');
                 registrySha = res.sha; 
-                try {
-                    clientsRegistry = JSON.parse(b64_to_utf8(res.content));
-                } catch(parseErr) {
-                    // Если файл clients.json сломан внутри
-                    console.error("Ошибка парсинга JSON", parseErr);
-                    clientsRegistry = []; 
-                    await saveRegistry();
-                }
+                try { clientsRegistry = JSON.parse(b64_to_utf8(res.content)); } 
+                catch(parseErr) { clientsRegistry = []; await saveRegistry(); }
             } catch(e) { 
-                // Если файла вообще нет или токен без прав
-                console.warn("Файл clients.json не найден, создаем новый.");
                 clientsRegistry = []; 
-                try {
-                    await saveRegistry(); 
-                } catch(saveErr) {
-                    hideLoader();
-                    return alert("Ошибка создания реестра! Проверьте, есть ли у вашего токена галочка 'repo'.");
-                }
+                try { await saveRegistry(); } 
+                catch(saveErr) { hideLoader(); return alert("Ошибка создания реестра! Проверьте токен."); }
             }
             
             document.getElementById('searchClientInp').value = '';
@@ -336,7 +306,7 @@
                 await githubReq('PUT', `${newId}/data.json`, { message: `База ${newId}`, content: utf8_to_b64(JSON.stringify(newData, null, 2)) });
                 clientsRegistry.push({ id: newId, alias: alias, name: name, blocked: false });
                 await saveRegistry(); hideLoader(); renderClientList();
-            } catch(e) { hideLoader(); alert("Ошибка при создании. Убедитесь, что template.html существует."); }
+            } catch(e) { hideLoader(); alert("Ошибка при создании."); }
         }
 
         function openClientActionModal(c) {
@@ -475,7 +445,7 @@
 
         function handleCustomIconUpload(event) {
             const urlInput = document.getElementById('newCustomUrl').value.trim();
-            if(!urlInput) { alert("Сначала введите ссылку!"); event.target.value = ''; return; }
+            if(!urlInput) { alert("Введите ссылку перед загрузкой иконки!"); event.target.value = ''; return; }
             
             const file = event.target.files[0]; if(!file) return;
             const reader = new FileReader();
@@ -520,10 +490,21 @@
             closeModal('contactsModalOverlay');
         }
 
+        // --- УМНОЕ СОХРАНЕНИЕ С ЗАПРОСОМ ТОКЕНА ---
         async function saveData() {
-            const tokenToUse = activeMode === 'admin' ? ghToken : SYSTEM_TOKEN;
-            if(!tokenToUse) return alert("Системный токен не настроен! Свяжитесь с разработчиком (строка 200).");
+            let tokenToUse = activeMode === 'admin' ? ghToken : sessionClientToken;
             
+            if (activeMode === 'client' && !tokenToUse) {
+                tokenToUse = prompt("Введите токен GitHub для сохранения (или нажмите Отмена для скачивания data.json):");
+                if (!tokenToUse) {
+                    const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2)); a.download = "data.json"; document.body.appendChild(a); a.click(); a.remove();
+                    return alert("Файл скачан! Отправьте его разработчику.");
+                }
+                sessionClientToken = tokenToUse.trim(); 
+            }
+            
+            if(!tokenToUse) return;
+
             showLoader("Сохранение...");
             try {
                 if(activeMode === 'client') {
@@ -532,8 +513,12 @@
                 }
                 
                 const res = await githubReq('PUT', `${currentId}/data.json`, { message: "Обновление визитки", content: utf8_to_b64(JSON.stringify(appData, null, 2)), sha: fileSha }, tokenToUse);
-                fileSha = res.content.sha; hideLoader(); alert("Успешно сохранено!");
-            } catch(e) { hideLoader(); alert("Ошибка сохранения."); }
+                fileSha = res.content.sha; hideLoader(); alert("Успешно сохранено на сервер!");
+            } catch(e) { 
+                hideLoader(); 
+                alert("Ошибка сохранения. Проверьте правильность токена.");
+                if(activeMode === 'client') sessionClientToken = ''; // Сбрасываем кривой токен
+            }
         }
     </script>
 </body>
