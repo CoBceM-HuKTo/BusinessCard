@@ -28,6 +28,14 @@
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         
+        /* КАСТОМНЫЕ УВЕДОМЛЕНИЯ (ВМЕСТО ALERTS) */
+        #toastContainer { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast { background: #333; color: #fff; padding: 12px 20px; border-radius: 30px; font-size: 14px; font-weight: 500; box-shadow: 0 5px 15px rgba(0,0,0,0.2); animation: toastIn 0.3s ease forwards; text-align: center; }
+        .toast.error { background: #ff3b30; }
+        .toast.success { background: #34c759; }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes toastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(20px); } }
+
         #dashboardView { display: none; padding: 20px; max-width: 600px; margin: 0 auto; padding-bottom: 100px; }
         .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .client-card { background: #fff; padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border: 1px solid #eee; cursor: pointer;}
@@ -38,7 +46,6 @@
         .status-badge.blocked { background: #ffebee; color: #c62828; }
         .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--accent); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 10px 20px rgba(0,122,255,0.3); border: none; cursor: pointer; z-index: 100;}
         
-        /* ИСПРАВЛЕННЫЙ КРАСИВЫЙ БАР РЕДАКТОРА */
         #editorView { display: none; padding-top: 80px; padding-bottom: 100px; max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; }
         .admin-topbar { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); width: calc(100% - 30px); max-width: 450px; background: rgba(255,255,255,0.85); backdrop-filter: blur(15px); padding: 8px 12px; border-radius: 20px; display: flex; gap: 8px; justify-content: space-between; box-shadow: 0 8px 25px rgba(0,0,0,0.08); z-index: 1000; border: 1px solid rgba(0,0,0,0.05); }
         .admin-btn { flex: 1; padding: 10px 5px; background: #f4f5f7; border: none; border-radius: 12px; font-size: 12px; font-weight: 600; cursor: pointer; color: #333; display:flex; align-items:center; justify-content:center; gap:5px;}
@@ -48,10 +55,10 @@
         .header { padding: 20px; text-align: center; }
         .avatar { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 4px solid var(--accent); cursor: pointer; }
         .name { font-size: 24px; font-weight: 700; margin-bottom: 5px; }
+        .role { font-size: 14px; color: #888; font-weight: 500; }
         .services { padding: 20px; display: grid; gap: 15px; }
-        .card { background: #fff; padding: 20px; border-radius: 20px; border: 1px solid #eee; border-left: 5px solid var(--accent); }
+        .card { background: #fff; padding: 20px; border-radius: 20px; border: 1px solid #eee; border-left: 5px solid var(--accent); cursor: pointer;}
         
-        /* МОДАЛКИ */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; justify-content: center; z-index: 999; }
         .modal-overlay.active { display: flex; }
         .modal { background: #fff; width: 100%; max-width: 480px; border-radius: 30px 30px 0 0; padding: 25px 20px 30px; max-height: 90vh; overflow-y: auto; }
@@ -64,7 +71,7 @@
     </style>
 </head>
 <body>
-
+    <div id="toastContainer"></div>
     <div id="globalLoader"><div class="spinner"></div><h3 id="loaderText">Загрузка...</h3></div>
 
     <div id="authView" class="panel">
@@ -74,35 +81,24 @@
         </div>
 
         <div id="formClient">
-            <div class="input-group">
-                <label>Ваш ID (Логин)</label>
-                <input type="text" id="clientLoginInp" placeholder="Например: 000001">
-            </div>
-            <div class="input-group">
-                <label>Пароль</label>
-                <input type="password" id="clientPassInp" placeholder="Пароль">
-            </div>
+            <div class="input-group"><label>Ваш ID (Логин)</label><input type="text" id="clientLoginInp" placeholder="Например: 000001"></div>
+            <div class="input-group"><label>Пароль</label><input type="password" id="clientPassInp" placeholder="Пароль"></div>
             <button class="btn" onclick="loginAsClient()">Войти в редактор</button>
         </div>
 
         <div id="formAdmin" style="display: none;">
-            <div class="input-group">
-                <label>Репозиторий</label>
-                <input type="text" id="repoInp" value="CoBceM-HuKTo/BusinessCard">
-            </div>
-            <div class="input-group">
-                <label>GitHub Token</label>
-                <input type="password" id="tokenInp" placeholder="ghp_...">
-            </div>
+            <div class="input-group"><label>Репозиторий</label><input type="text" id="repoInp" value="CoBceM-HuKTo/BusinessCard"></div>
+            <div class="input-group"><label>GitHub Token</label><input type="password" id="tokenInp" placeholder="ghp_..."></div>
             <button class="btn dark" onclick="loginAsAdmin()">Управление системой</button>
         </div>
     </div>
 
     <div id="menuView" class="panel" style="display: none;">
         <h2>Панель Создателя</h2>
-        <button class="btn dark" onclick="openTemplateEditor()" style="margin-bottom: 25px;">🛠 Редактировать шаблон</button>
-        <button class="btn" onclick="openDashboard()" style="margin-bottom: 25px;">👥 База клиентов</button>
-        <button class="btn secondary" style="margin-top:10px;" onclick="location.reload()">Выйти</button>
+        <button class="btn dark" onclick="openTemplateEditor()" style="margin-bottom: 10px;">🛠 Редактировать шаблон</button>
+        <button class="btn" onclick="openDashboard()" style="margin-bottom: 10px;">👥 База клиентов</button>
+        <button class="btn" style="background:#ff9500; margin-bottom: 25px;" onclick="openConfirmModal('updateAll')">🔄 Обновить дизайн всем</button>
+        <button class="btn secondary" onclick="location.reload()">Выйти</button>
     </div>
 
     <div id="dashboardView">
@@ -117,7 +113,6 @@
 
     <div id="editorView">
         <div class="admin-topbar">
-            <!-- Убрал кнопку Фото. Оставил только нужные -->
             <button class="admin-btn secondary" id="backToDashBtn" onclick="openDashboard()">⬅ Назад</button>
             <button class="admin-btn" onclick="addService()">+ Услуга</button>
             <button class="admin-btn" onclick="openContactsModal()">🔗 Контакты</button>
@@ -127,10 +122,9 @@
         <input type="file" id="photoUploader" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
         
         <header class="header">
-            <p id="greetingText" class="editable-text" data-key="greeting" style="color:#888; font-weight:600; text-transform:uppercase;"></p>
             <img id="avatarImg" src="" class="avatar" onclick="document.getElementById('photoUploader').click()">
             <h1 id="nameText" class="name editable-text" data-key="name"></h1>
-            <p style="font-size:12px; color:#888;">Смена фото — по клику на картинку.</p>
+            <p id="roleText" class="role editable-text" data-key="role">Должность</p>
         </header>
         <div class="services" id="servicesList"></div>
     </div>
@@ -144,11 +138,10 @@
         </div>
     </div>
 
-    <!-- КОНТАКТЫ (ИСПРАВЛЕНО БЕЗ PROMPT) -->
+    <!-- Модалка Контактов (БЕЗ ALERTS) -->
     <div class="modal-overlay" id="contactsModalOverlay">
         <div class="modal" style="border-radius:20px; padding:20px; margin:20px; max-width:400px; transform:translateY(0);">
             <h2 style="margin-bottom:15px;">Контакты и Ссылки</h2>
-            
             <div class="input-group"><label>Телефон (через 7, без +)</label><input type="text" id="inpPhone"></div>
             <div class="input-group"><label>Telegram (без @)</label><input type="text" id="inpTg"></div>
             <div class="input-group"><label>ID ВКонтакте</label><input type="text" id="inpVk"></div>
@@ -156,7 +149,6 @@
             <h3 style="font-size:14px; margin:20px 0 10px;">Свои кнопки</h3>
             <div id="customLinksList" style="margin-bottom: 15px;"></div>
             
-            <!-- Форма добавления своей ссылки (Вместо prompt) -->
             <div style="background:#f4f5f7; padding:15px; border-radius:15px; border:1px solid #ddd;">
                 <label style="font-size:12px; color:#888; display:block; margin-bottom:5px;">Добавить новую ссылку</label>
                 <input type="text" id="newCustomUrl" placeholder="https://..." style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; margin-bottom:10px; outline:none;">
@@ -171,6 +163,7 @@
         </div>
     </div>
 
+    <!-- Модалка услуги -->
     <div class="modal-overlay" id="serviceModalOverlay">
         <div class="modal" id="serviceModal">
             <div class="modal-header">
@@ -180,7 +173,7 @@
             <div class="modal-section"><h3 style="color:#007aff;">💼 Мой опыт</h3><p id="modalExp" class="editable-text" data-field="exp"></p></div>
             <div class="modal-section"><h3 style="color:#34c759;">🔥 В чем я крут</h3><p id="modalGood" class="editable-text" data-field="good"></p></div>
             <div class="modal-section"><h3 style="color:#ff3b30;">⚠️ В чем я плох</h3><p id="modalBad" class="editable-text" data-field="bad"></p></div>
-            <button onclick="deleteCurrentService()" style="width:100%; padding:15px; background:#ff3b30; color:#fff; border:none; border-radius:15px; font-size:16px; margin-top:10px;">🗑 Удалить услугу</button>
+            <button onclick="openConfirmModal('deleteService')" style="width:100%; padding:15px; background:#ff3b30; color:#fff; border:none; border-radius:15px; font-size:16px; margin-top:10px;">🗑 Удалить услугу</button>
         </div>
     </div>
 
@@ -202,30 +195,67 @@
         <div class="modal" style="border-radius:20px; padding:20px; margin:20px; max-width:400px; transform:translateY(0); text-align:center;">
             <h2 id="actionClientName" style="margin-bottom:20px;">Клиент</h2>
             <button class="btn" style="background:#ffcc00; color:#333;" id="toggleBlockBtn" onclick="toggleBlockClient()">Блокировать</button>
-            <button class="btn" style="background:#ff3b30;" onclick="deleteClientProcess()">Удалить навсегда</button>
+            <button class="btn" style="background:#ff3b30;" onclick="openConfirmModal('deleteClient')">Удалить навсегда</button>
             <button class="btn secondary" onclick="closeModal('clientActionModal')">Отмена</button>
         </div>
     </div>
 
+    <!-- Общее окно подтверждения действий -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal" style="border-radius:20px; padding:25px; margin:20px; max-width:350px; transform:translateY(0); text-align:center;">
+            <h3 id="confirmTitle" style="margin-bottom:10px;">Вы уверены?</h3>
+            <p id="confirmDesc" style="font-size:14px; color:#666; margin-bottom:20px;">Это действие нельзя будет отменить.</p>
+            <div style="display:flex; gap:10px;">
+                <button class="btn secondary" onclick="closeModal('confirmModal')">Нет</button>
+                <button class="btn" style="background:#ff3b30;" id="confirmYesBtn">Да, продолжить</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // --- ПАРАМЕТРЫ СИСТЕМЫ ---
-        const SYSTEM_TOKEN = "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"; // <--- ВСТАВЬТЕ СЮДА ВАШ ТОКЕН GITHUB ДЛЯ СОХРАНЕНИЯ КЛИЕНТАМИ
+        // === ВАШ ТОКЕН ДЛЯ СОХРАНЕНИЯ КЛИЕНТАМИ ===
+        const SYSTEM_TOKEN = ""; 
         
+        // УТИЛИТЫ И ТОСТЫ
         function utf8_to_b64(str) { return window.btoa(unescape(encodeURIComponent(str))); }
         function b64_to_utf8(str) { return decodeURIComponent(escape(window.atob(str))); }
         function showView(id) { document.querySelectorAll('#authView, #menuView, #dashboardView, #editorView, #codeEditorView').forEach(e => e.style.display='none'); document.getElementById(id).style.display = id==='codeEditorView'?'flex':'block'; }
         function showLoader(txt) { document.getElementById('loaderText').textContent = txt; document.getElementById('globalLoader').style.display = 'flex'; }
         function hideLoader() { document.getElementById('globalLoader').style.display = 'none'; }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        
+        function showToast(msg, type='success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div'); toast.className = `toast ${type}`; toast.textContent = msg;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.animation = 'toastOut 0.3s ease forwards'; setTimeout(() => toast.remove(), 300); }, 3000);
+        }
 
-        let activeMode = 'client'; 
-        let currentId = null;
+        let pendingAction = null;
+        function openConfirmModal(actionType) {
+            pendingAction = actionType;
+            const t = document.getElementById('confirmTitle'); const d = document.getElementById('confirmDesc'); const y = document.getElementById('confirmYesBtn');
+            if(actionType === 'deleteService') { t.textContent = "Удалить услугу?"; d.textContent = "Услуга пропадет из визитки."; y.textContent = "Удалить"; }
+            else if(actionType === 'deleteClient') { t.textContent = "Удалить клиента?"; d.textContent = "Его база данных будет стерта навсегда."; y.textContent = "Удалить"; }
+            else if(actionType === 'updateAll') { t.textContent = "Обновить всем дизайн?"; d.textContent = "Скрипт заменит index.html у всех клиентов на актуальный template.html."; y.textContent = "Обновить"; y.style.background = "#ff9500"; }
+            
+            y.onclick = () => { closeModal('confirmModal'); executeConfirmAction(); };
+            document.getElementById('confirmModal').classList.add('active');
+        }
+
+        function executeConfirmAction() {
+            if(pendingAction === 'deleteService') { appData.services = appData.services.filter(s => s.id != activeServiceId); closeModal('serviceModalOverlay'); renderServices(); }
+            else if(pendingAction === 'deleteClient') { deleteClientProcess(); }
+            else if(pendingAction === 'updateAll') { updateAllClientsProcess(); }
+            pendingAction = null;
+        }
+
+        let activeMode = 'client'; let currentId = null;
         let ghRepo = localStorage.getItem('ghRepo') || 'CoBceM-HuKTo/BusinessCard';
         let ghToken = localStorage.getItem('ghToken') || '';
-        let fileSha = null; let templateSha = null; let appData = {};
-        let clientsRegistry = []; let registrySha = null; let actionClientId = null;
+        let appData = {}; let clientsRegistry = []; let registrySha = null; let actionClientId = null;
 
-        const defaultData = { name: "Новый Клиент", greeting: "Добрый день", avatar: "https://placehold.co/400x400/eeeeee/999999?text=Фото", phone: "79000000000", tg: "username", vk: "id0", customLinks: [], categories: ["Бизнес"], services: [] };
+        const defaultData = { name: "Имя Фамилия", role: "Должность", avatar: "https://placehold.co/400x400/eeeeee/999999?text=Фото", phone: "79000000000", tg: "username", vk: "id0", customLinks: [], categories: ["Бизнес"], services: [] };
 
         if(ghToken) document.getElementById('tokenInp').value = ghToken;
 
@@ -235,27 +265,22 @@
             else { document.getElementById('tabAdmin').classList.add('active'); document.getElementById('formClient').style.display = 'none'; document.getElementById('formAdmin').style.display = 'block'; }
         }
 
-        // ВХОД КЛИЕНТА
         function loginAsClient() {
             const login = document.getElementById('clientLoginInp').value.trim();
             const pass = document.getElementById('clientPassInp').value.trim();
-            if(!login || login !== pass) return alert("Неверный логин или пароль");
+            if(!login || login !== pass) return showToast("Неверный ID", "error");
             
-            currentId = login; activeMode = 'client';
-            document.getElementById('backToDashBtn').style.display = 'none'; 
-            
+            currentId = login; activeMode = 'client'; document.getElementById('backToDashBtn').style.display = 'none'; 
             showLoader("Загрузка визитки...");
             fetch(`${currentId}/data.json?v=` + Date.now())
                 .then(res => { if(!res.ok) throw new Error(); return res.json(); })
-                .then(data => { appData = data; hideLoader(); initEditor(); showView('editorView'); })
-                .catch(err => { hideLoader(); alert(`Клиент ${currentId} не найден.`); });
+                .then(data => { appData = data; hideLoader(); initEditor(); showView('editorView'); showToast("Вы вошли"); })
+                .catch(err => { hideLoader(); showToast("Клиент не найден", "error"); });
         }
 
-        // ВХОД АДМИНА
         function loginAsAdmin() {
-            ghRepo = document.getElementById('repoInp').value.trim();
-            ghToken = document.getElementById('tokenInp').value.trim();
-            if(!ghToken) return alert("Введите токен!");
+            ghRepo = document.getElementById('repoInp').value.trim(); ghToken = document.getElementById('tokenInp').value.trim();
+            if(!ghToken) return showToast("Введите токен", "error");
             localStorage.setItem('ghRepo', ghRepo); localStorage.setItem('ghToken', ghToken);
             activeMode = 'admin'; document.getElementById('backToDashBtn').style.display = 'block';
             showView('menuView'); 
@@ -267,22 +292,20 @@
             const opts = { method, headers: { 'Authorization': `token ${useToken}`, 'Accept': 'application/vnd.github.v3+json' } };
             if(body) opts.body = JSON.stringify(body);
             const res = await fetch(`https://api.github.com/repos/${ghRepo}/contents/${path}`, opts);
-            if(!res.ok) throw new Error(res.status);
+            if(!res.ok && res.status !== 404) throw new Error(res.status);
+            if(res.status === 404) return null; // Для обработки первого запуска без файлов
             return await res.json();
         }
 
-        // ИСПРАВЛЕНО: Ждем загрузки перед отрисовкой дашборда
         async function openDashboard() {
             showLoader("Загрузка базы клиентов...");
             try {
                 const res = await githubReq('GET', 'clients.json');
-                registrySha = res.sha; clientsRegistry = JSON.parse(b64_to_utf8(res.content));
+                if(res) { registrySha = res.sha; clientsRegistry = JSON.parse(b64_to_utf8(res.content)); }
+                else { clientsRegistry = []; await saveRegistry(); }
             } catch(e) { clientsRegistry = []; await saveRegistry(); }
             
-            document.getElementById('searchClientInp').value = '';
-            renderClientList();
-            hideLoader();
-            showView('dashboardView');
+            document.getElementById('searchClientInp').value = ''; renderClientList(); hideLoader(); showView('dashboardView');
         }
 
         async function saveRegistry() {
@@ -301,7 +324,6 @@
             filtered.forEach(c => {
                 const div = document.createElement('div'); div.className = 'client-card';
                 div.innerHTML = `<div class="client-info"><h4>${c.name}</h4><p>ID: ${c.id} | /${c.alias}</p></div><div class="status-badge ${c.blocked ? 'blocked' : 'active'}">${c.blocked ? 'Блок' : 'Активен'}</div>`;
-                
                 let timer;
                 div.onmousedown = () => { timer = setTimeout(() => { openClientActionModal(c); }, 600); };
                 div.ontouchstart = () => { timer = setTimeout(() => { openClientActionModal(c); }, 600); };
@@ -315,9 +337,8 @@
         function showNewClientModal() { document.getElementById('newAliasInp').value = ''; document.getElementById('newNameInp').value = ''; document.getElementById('newClientModal').classList.add('active'); }
 
         async function createClientProcess() {
-            const alias = document.getElementById('newAliasInp').value.trim();
-            const name = document.getElementById('newNameInp').value.trim();
-            if(!alias || !name) return alert("Заполните оба поля!");
+            const alias = document.getElementById('newAliasInp').value.trim(); const name = document.getElementById('newNameInp').value.trim();
+            if(!alias || !name) return showToast("Заполните оба поля!", "error");
             let maxId = 0; clientsRegistry.forEach(c => { const num = parseInt(c.id); if(num > maxId) maxId = num; });
             const newId = String(maxId + 1).padStart(6, '0');
 
@@ -329,13 +350,12 @@
                 const newData = JSON.parse(JSON.stringify(defaultData)); newData.name = name;
                 await githubReq('PUT', `${newId}/data.json`, { message: `База ${newId}`, content: utf8_to_b64(JSON.stringify(newData, null, 2)) });
                 clientsRegistry.push({ id: newId, alias: alias, name: name, blocked: false });
-                await saveRegistry(); hideLoader(); renderClientList();
-            } catch(e) { hideLoader(); alert("Ошибка при создании."); }
+                await saveRegistry(); hideLoader(); renderClientList(); showToast("Клиент создан!");
+            } catch(e) { hideLoader(); showToast("Ошибка. Есть ли template.html?", "error"); }
         }
 
         function openClientActionModal(c) {
-            actionClientId = c.id;
-            document.getElementById('actionClientName').textContent = c.name + ` (${c.id})`;
+            actionClientId = c.id; document.getElementById('actionClientName').textContent = c.name + ` (${c.id})`;
             document.getElementById('toggleBlockBtn').textContent = c.blocked ? 'Разблокировать' : 'Заблокировать';
             document.getElementById('clientActionModal').classList.add('active');
         }
@@ -348,30 +368,46 @@
                 const res = await githubReq('GET', `${client.id}/data.json`);
                 const cData = JSON.parse(b64_to_utf8(res.content)); cData.blocked = client.blocked;
                 await githubReq('PUT', `${client.id}/data.json`, { message: "Статус", content: utf8_to_b64(JSON.stringify(cData, null, 2)), sha: res.sha });
-                hideLoader(); renderClientList();
-            } catch(e) { hideLoader(); alert("Ошибка!"); }
+                hideLoader(); renderClientList(); showToast("Статус изменен");
+            } catch(e) { hideLoader(); showToast("Ошибка", "error"); }
         }
 
         async function deleteClientProcess() {
-            if(!confirm("Удалить базу данных навсегда?")) return;
             const client = clientsRegistry.find(c => c.id === actionClientId);
             closeModal('clientActionModal'); showLoader("Удаление...");
             try {
                 const res = await githubReq('GET', `${client.id}/data.json`);
-                await githubReq('DELETE', `${client.id}/data.json`, { message: "Удаление", sha: res.sha });
+                if(res) await githubReq('DELETE', `${client.id}/data.json`, { message: "Удаление", sha: res.sha });
                 clientsRegistry = clientsRegistry.filter(c => c.id !== actionClientId);
-                await saveRegistry(); hideLoader(); renderClientList();
-            } catch(e) { hideLoader(); alert("Ошибка удаления."); }
+                await saveRegistry(); hideLoader(); renderClientList(); showToast("Клиент удален");
+            } catch(e) { hideLoader(); showToast("Ошибка удаления.", "error"); }
+        }
+
+        async function updateAllClientsProcess() {
+            showLoader("Массовое обновление дизайна...");
+            try {
+                const tmpl = await githubReq('GET', 'template.html');
+                const rawHtml = b64_to_utf8(tmpl.content);
+                
+                for(let c of clientsRegistry) {
+                    try {
+                        const oldHtmlRes = await githubReq('GET', `${c.alias}/index.html`);
+                        const clientHtml = rawHtml.replace('{{CLIENT_ID}}', c.id);
+                        await githubReq('PUT', `${c.alias}/index.html`, { message: `Обновлен дизайн ${c.alias}`, content: utf8_to_b64(clientHtml), sha: oldHtmlRes.sha });
+                    } catch(err) { console.log(`Пропущен ${c.alias}`); }
+                }
+                hideLoader(); showToast("Дизайн обновлен у всех!");
+            } catch(e) { hideLoader(); showToast("Ошибка обновления", "error"); }
         }
 
         async function loadClientData(id) {
             currentId = id; showLoader("Загрузка данных...");
             try {
                 const apiRes = await githubReq('GET', `${currentId}/data.json`);
-                fileSha = apiRes.sha; appData = JSON.parse(b64_to_utf8(apiRes.content));
+                appData = JSON.parse(b64_to_utf8(apiRes.content));
                 if(!appData.customLinks) appData.customLinks = [];
                 hideLoader(); initEditor(); showView('editorView');
-            } catch(e) { hideLoader(); alert("Не найдена папка " + currentId); }
+            } catch(e) { hideLoader(); showToast("Не найдена база клиента", "error"); }
         }
 
         async function openTemplateEditor() {
@@ -380,20 +416,20 @@
                 const res = await githubReq('GET', 'template.html');
                 templateSha = res.sha; document.getElementById('codeArea').value = b64_to_utf8(res.content);
                 hideLoader(); showView('codeEditorView');
-            } catch(e) { hideLoader(); alert("Файл template.html не найден."); }
+            } catch(e) { hideLoader(); showToast("Шаблон не найден", "error"); }
         }
 
         async function saveTemplateToGitHub() {
             showLoader("Сохраняем шаблон...");
             try {
                 const res = await githubReq('PUT', 'template.html', { message: "Обновлен шаблон", content: utf8_to_b64(document.getElementById('codeArea').value), sha: templateSha });
-                templateSha = res.content.sha; hideLoader(); alert("Шаблон обновлен!");
-            } catch(e) { hideLoader(); alert("Ошибка сохранения шаблона."); }
+                templateSha = res.content.sha; hideLoader(); showToast("Шаблон обновлен!");
+            } catch(e) { hideLoader(); showToast("Ошибка", "error"); }
         }
 
         function initEditor() {
             document.getElementById('nameText').textContent = appData.name;
-            document.getElementById('greetingText').textContent = appData.greeting;
+            document.getElementById('roleText').textContent = appData.role || 'Должность';
             document.getElementById('avatarImg').src = appData.avatar || 'https://placehold.co/400x400/eeeeee/999999?text=Фото';
             renderServices(); setupLongPressEditors(document.getElementById('editorView'));
         }
@@ -404,7 +440,7 @@
                 const c = document.createElement('div'); c.className = 'card';
                 c.onclick = (e) => { if(!c.querySelector('[contenteditable="true"]')) openServiceModal(s); };
                 c.innerHTML = `
-                    <div style="font-size:12px; color:#888; margin-bottom:10px;">Кат: <b class="editable-text" data-sid="${s.id}" data-field="category">${s.category}</b> <button onclick="event.stopPropagation(); deleteService(${s.id})" style="float:right; border:none; background:none; color:red;">❌</button></div>
+                    <div style="font-size:12px; color:#888; margin-bottom:10px;">Кат: <b class="editable-text" data-sid="${s.id}" data-field="category">${s.category}</b></div>
                     <div style="font-size:18px; font-weight:bold;" class="editable-text" data-sid="${s.id}" data-field="title">${s.title}</div>
                 `;
                 list.appendChild(c);
@@ -421,7 +457,7 @@
                     const canvas = document.createElement('canvas'); const MAX_SIZE = 400; let width = img.width; let height = img.height;
                     if(width > height) { if(width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if(height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
                     canvas.width = width; canvas.height = height; canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                    const b64 = canvas.toDataURL('image/jpeg', 0.8); appData.avatar = b64; document.getElementById('avatarImg').src = b64;
+                    const b64 = canvas.toDataURL('image/jpeg', 0.8); appData.avatar = b64; document.getElementById('avatarImg').src = b64; showToast("Фото обновлено");
                 }
                 img.src = e.target.result;
             }
@@ -456,21 +492,16 @@
             document.getElementById('serviceModalOverlay').classList.add('active'); setupLongPressEditors(document.getElementById('serviceModal'));
         }
 
-        function addService() { appData.services.push({ id: Date.now(), title: 'Новая услуга', category: 'Разное', exp: 'Опыт', good: 'Плюсы', bad: 'Минусы' }); renderServices(); window.scrollTo(0, document.body.scrollHeight); }
-        function deleteService(id) { if(confirm("Удалить услугу?")){ appData.services = appData.services.filter(s => s.id != id); closeModal('serviceModalOverlay'); renderServices(); } }
+        function addService() { appData.services.push({ id: Date.now(), title: 'Новая услуга', category: 'Разное', exp: 'Опыт', good: 'Плюсы', bad: 'Минусы' }); renderServices(); window.scrollTo(0, document.body.scrollHeight); showToast("Услуга добавлена"); }
 
-        // --- УПРАВЛЕНИЕ КОНТАКТАМИ (БЕЗ PROMPT) ---
         function openContactsModal() {
-            document.getElementById('inpPhone').value = appData.phone || '';
-            document.getElementById('inpTg').value = appData.tg || '';
-            document.getElementById('inpVk').value = appData.vk || '';
-            renderCustomLinks();
-            document.getElementById('contactsModalOverlay').classList.add('active');
+            document.getElementById('inpPhone').value = appData.phone || ''; document.getElementById('inpTg').value = appData.tg || ''; document.getElementById('inpVk').value = appData.vk || '';
+            renderCustomLinks(); document.getElementById('contactsModalOverlay').classList.add('active');
         }
 
         function handleCustomIconUpload(event) {
             const urlInput = document.getElementById('newCustomUrl').value.trim();
-            if(!urlInput) { alert("Сначала введите ссылку!"); event.target.value = ''; return; }
+            if(!urlInput) { showToast("Введите ссылку", "error"); event.target.value = ''; return; }
             
             const file = event.target.files[0]; if(!file) return;
             const reader = new FileReader();
@@ -482,9 +513,7 @@
                     const b64 = canvas.toDataURL(file.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.9);
                     if(!appData.customLinks) appData.customLinks = [];
                     appData.customLinks.push({ id: Date.now(), url: urlInput, icon: b64 });
-                    renderCustomLinks();
-                    document.getElementById('newCustomUrl').value = '';
-                    event.target.value = ''; 
+                    renderCustomLinks(); document.getElementById('newCustomUrl').value = ''; event.target.value = ''; showToast("Кнопка добавлена");
                 }
                 img.src = e.target.result;
             }
@@ -495,42 +524,31 @@
             const container = document.getElementById('customLinksList'); container.innerHTML = '';
             if(!appData.customLinks) return;
             appData.customLinks.forEach(link => {
-                container.innerHTML += `
-                <div style="display:flex; align-items:center; justify-content:space-between; background:#fff; padding:10px; border-radius:10px; margin-bottom:10px; border:1px solid #eee;">
-                    <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
-                        <img src="${link.icon}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
-                        <span style="font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:150px;">${link.url}</span>
-                    </div>
-                    <button onclick="removeCustomLink(${link.id})" style="background:none; border:none; color:red; font-size:16px;">❌</button>
-                </div>`;
+                container.innerHTML += `<div style="display:flex; align-items:center; justify-content:space-between; background:#fff; padding:10px; border-radius:10px; margin-bottom:10px; border:1px solid #eee;"><div style="display:flex; align-items:center; gap:10px; overflow:hidden;"><img src="${link.icon}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;"><span style="font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:150px;">${link.url}</span></div><button onclick="removeCustomLink(${link.id})" style="background:none; border:none; color:red; font-size:16px;">❌</button></div>`;
             });
         }
 
-        function removeCustomLink(id) { appData.customLinks = appData.customLinks.filter(l => l.id != id); renderCustomLinks(); }
+        function removeCustomLink(id) { appData.customLinks = appData.customLinks.filter(l => l.id != id); renderCustomLinks(); showToast("Удалено"); }
 
         function saveContactsFromModal() {
-            appData.phone = document.getElementById('inpPhone').value.trim();
-            appData.tg = document.getElementById('inpTg').value.trim();
-            appData.vk = document.getElementById('inpVk').value.trim();
-            closeModal('contactsModalOverlay');
+            appData.phone = document.getElementById('inpPhone').value.trim(); appData.tg = document.getElementById('inpTg').value.trim(); appData.vk = document.getElementById('inpVk').value.trim();
+            closeModal('contactsModalOverlay'); showToast("Контакты обновлены");
         }
 
-        // СОХРАНЕНИЕ
+        // ИСПРАВЛЕННОЕ СОХРАНЕНИЕ
         async function saveData() {
             const tokenToUse = activeMode === 'admin' ? ghToken : SYSTEM_TOKEN;
-            if(!tokenToUse) return alert("Системный токен не настроен! Свяжитесь с разработчиком.");
+            if(!tokenToUse) return showToast("Нет прав сохранения", "error");
             
             showLoader("Сохранение...");
             try {
-                // Если мы в режиме клиента, нужно получить актуальный SHA перед записью
-                if(activeMode === 'client') {
-                    const checkRes = await githubReq('GET', `${currentId}/data.json`, null, tokenToUse);
-                    fileSha = checkRes.sha;
-                }
+                // Всегда запрашиваем свежий SHA перед PUT-запросом, чтобы избежать ошибки 409
+                const checkRes = await githubReq('GET', `${currentId}/data.json`, null, tokenToUse);
+                const freshSha = checkRes.sha;
                 
-                const res = await githubReq('PUT', `${currentId}/data.json`, { message: "Обновление визитки", content: utf8_to_b64(JSON.stringify(appData, null, 2)), sha: fileSha }, tokenToUse);
-                fileSha = res.content.sha; hideLoader(); alert("Успешно сохранено!");
-            } catch(e) { hideLoader(); alert("Ошибка сохранения."); }
+                const res = await githubReq('PUT', `${currentId}/data.json`, { message: "Обновление визитки", content: utf8_to_b64(JSON.stringify(appData, null, 2)), sha: freshSha }, tokenToUse);
+                hideLoader(); showToast("Успешно сохранено!");
+            } catch(e) { hideLoader(); showToast("Ошибка сохранения", "error"); }
         }
     </script>
 </body>
