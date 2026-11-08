@@ -16,5 +16,11 @@
     "alias": "Visits",
     "name": "Веб-визитки под ключ",
     "blocked": false
+  },
+  {
+    "id": "000004",
+    "alias": "art",
+    "name": "Искуственный Интеллект",
+    "blocked": false
   }
 ]
