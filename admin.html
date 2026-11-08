@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CMS Визиток (Автоматическая)</title>
+    <title>CMS Визиток</title>
     <style>
         :root { --bg: #f4f5f7; --text: #1d1d1f; --accent: #007aff; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
         body { background: var(--bg); color: var(--text); -webkit-tap-highlight-color: transparent; }
         
-        .panel { max-width: 400px; margin: 50px auto; background: #fff; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .panel { max-width: 450px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .panel h2 { margin-bottom: 20px; text-align: center; }
         .input-group { margin-bottom: 15px; }
         .input-group label { display: block; font-size: 13px; color: #888; margin-bottom: 5px; }
@@ -22,101 +22,193 @@
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        #editorView { display: none; padding-top: 60px; max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
-        .admin-topbar { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #fff; padding: 10px; display: flex; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000; overflow-x: auto; }
-        .admin-btn { padding: 8px 12px; background: #f4f5f7; border: none; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; color: #333; margin-right: 5px; }
+        /* ПАНЕЛЬ СОЗДАТЕЛЯ (DASHBOARD) */
+        #dashboardView { display: none; padding: 20px; max-width: 600px; margin: 0 auto; padding-bottom: 100px; }
+        .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .client-card { background: #fff; padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border: 1px solid #eee; cursor: pointer; transition: 0.2s;}
+        .client-card:active { transform: scale(0.98); }
+        .client-info h4 { font-size: 16px; margin-bottom: 5px; }
+        .client-info p { font-size: 12px; color: #888; }
+        .status-badge { font-size: 10px; padding: 4px 8px; border-radius: 10px; font-weight: bold; }
+        .status-badge.active { background: #e8f5e9; color: #2e7d32; }
+        .status-badge.blocked { background: #ffebee; color: #c62828; }
+        .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--accent); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 10px 20px rgba(0,122,255,0.3); border: none; cursor: pointer; z-index: 100;}
+
+        /* РЕДАКТОР ВИЗИТКИ */
+        #editorView { display: none; padding-top: 60px; padding-bottom: 100px; max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+        .admin-topbar { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #fff; padding: 10px; display: flex; gap: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000; overflow-x: auto; }
+        .admin-btn { padding: 8px 12px; background: #f4f5f7; border: none; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; color: #333; white-space: nowrap;}
         .admin-btn.success { background: #34c759; color: #fff; }
         [contenteditable="true"] { outline: 2px dashed #007aff !important; background: rgba(0,122,255,0.05); border-radius: 5px; padding: 2px; }
-        
         .header { padding: 20px; text-align: center; }
         .avatar { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 4px solid var(--accent); cursor: pointer; }
         .name { font-size: 24px; font-weight: 700; margin-bottom: 5px; }
         .services { padding: 20px; display: grid; gap: 15px; }
         .card { background: #fff; padding: 20px; border-radius: 20px; border: 1px solid #eee; border-left: 5px solid var(--accent); }
+
+        /* Модальные окна */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; justify-content: center; z-index: 999; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: #fff; width: 100%; max-width: 480px; border-radius: 30px 30px 0 0; padding: 25px 20px 30px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .modal-header h2 { font-size: 22px; margin: 0; }
+        .modal-section { margin-bottom: 15px; background: var(--bg); padding: 15px; border-radius: 15px; }
     </style>
 </head>
 <body>
 
     <div id="globalLoader"><div class="spinner"></div><h3 id="loaderText">Загрузка...</h3></div>
 
-    <!-- Авторизация -->
+    <!-- ВХОД -->
     <div id="authView" class="panel">
         <h2>Вход в систему</h2>
         <div class="input-group">
-            <label>Репозиторий</label>
-            <input type="text" id="repoInp" value="CoBceM-HuKTo/BusinessCard">
+            <label>ID или Логин Создателя</label>
+            <input type="text" id="loginInp" placeholder="Например: 000000">
         </div>
         <div class="input-group">
-            <label>Токен GitHub</label>
-            <input type="password" id="tokenInp" placeholder="ghp_...">
+            <label>Пароль (или GitHub Токен)</label>
+            <input type="password" id="passInp" placeholder="Пароль">
         </div>
-        <button class="btn" onclick="saveAuth()">Войти</button>
+        <div class="input-group" id="repoGroup" style="display:none;">
+            <label>Репозиторий (только для 000000)</label>
+            <input type="text" id="repoInp" value="CoBceM-HuKTo/BusinessCard">
+        </div>
+        <button class="btn" onclick="login()">Войти</button>
     </div>
 
-    <!-- Меню -->
-    <div id="menuView" class="panel" style="display: none;">
-        <h2>Меню</h2>
-        <div style="background: #f9f9f9; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-            <h3>Редактировать визитку</h3>
-            <input type="text" id="editIdInp" placeholder="ID (например: 000001)" style="width:100%; padding:10px; margin:10px 0; border:1px solid #ccc; border-radius:8px;">
-            <button class="btn" onclick="loadClient()">Открыть</button>
+    <!-- ПАНЕЛЬ СОЗДАТЕЛЯ (DASHBOARD) -->
+    <div id="dashboardView">
+        <div class="dash-header">
+            <h2>Клиенты</h2>
+            <button class="btn secondary" style="width: auto; padding: 8px 15px; margin:0;" onclick="location.reload()">Выход</button>
         </div>
-        <div style="background: #e8f4fd; padding: 15px; border-radius: 10px;">
-            <h3 style="color: var(--accent);">Создать новую</h3>
-            <input type="text" id="newLinkInp" placeholder="Название папки (например: ivan)" style="width:100%; padding:10px; margin:10px 0 5px; border:1px solid #ccc; border-radius:8px;">
-            <input type="text" id="newIdInp" placeholder="ID (например: 000002)" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px;">
-            <button class="btn success" onclick="createNewClient()">Создать</button>
-        </div>
-        <button class="btn secondary" style="margin-top:10px;" onclick="logout()">Выйти</button>
+        <input type="text" id="searchClientInp" placeholder="🔍 Поиск по имени или ID..." style="width:100%; padding:12px; border-radius:10px; border:1px solid #ddd; margin-bottom:20px; outline:none;" oninput="renderClientList()">
+        
+        <div id="clientsListContainer"></div>
+        <button class="fab" onclick="showNewClientModal()">+</button>
     </div>
 
-    <!-- Редактор -->
+    <!-- РЕДАКТОР ВИЗИТКИ -->
     <div id="editorView">
         <div class="admin-topbar">
-            <button class="admin-btn secondary" onclick="location.reload()">⬅ В меню</button>
+            <button class="admin-btn secondary" id="backToDashBtn" onclick="showView('dashboardView')">⬅ Назад</button>
             <button class="admin-btn" onclick="addService()">+ Услуга</button>
-            <button class="admin-btn success" onclick="saveToGitHub()">💾 В GitHub</button>
+            <!-- Скрытый инпут для выбора фото с телефона -->
+            <input type="file" id="photoUploader" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
+            <button class="admin-btn" onclick="document.getElementById('photoUploader').click()">🖼 Фото</button>
+            <button class="admin-btn" onclick="editContacts()">🔗 Контакты</button>
+            <button class="admin-btn success" id="saveBtn" onclick="saveData()">💾 Сохранить</button>
         </div>
+
         <header class="header">
-            <p id="greetingText" class="editable-text" data-key="greeting" style="color:#888;">Загрузка...</p>
-            <img id="avatarImg" src="" class="avatar" onclick="editPhoto()">
-            <h1 id="nameText" class="name editable-text" data-key="name">Загрузка...</h1>
-            <p style="font-size:12px; color:#888;">Зажмите текст, чтобы изменить</p>
+            <p id="greetingText" class="editable-text" data-key="greeting" style="color:#888; font-weight:600; text-transform:uppercase;"></p>
+            <img id="avatarImg" src="" class="avatar" onclick="document.getElementById('photoUploader').click()">
+            <h1 id="nameText" class="name editable-text" data-key="name"></h1>
+            <p style="font-size:12px; color:#888;">Зажмите текст для изменения.</p>
         </header>
         <div class="services" id="servicesList"></div>
     </div>
 
+    <!-- Модалка управления услугой -->
+    <div class="modal-overlay" id="serviceModalOverlay">
+        <div class="modal" id="serviceModal">
+            <div class="modal-header">
+                <h2 id="modalTitle" class="editable-text" data-field="title">Заголовок</h2>
+                <button onclick="closeModal('serviceModalOverlay')" style="border:none; background:none; font-size:24px; cursor:pointer;">×</button>
+            </div>
+            <div class="modal-section"><h3 style="color:#007aff;">💼 Мой опыт</h3><p id="modalExp" class="editable-text" data-field="exp"></p></div>
+            <div class="modal-section"><h3 style="color:#34c759;">🔥 В чем я крут</h3><p id="modalGood" class="editable-text" data-field="good"></p></div>
+            <div class="modal-section"><h3 style="color:#ff3b30;">⚠️ В чем я плох</h3><p id="modalBad" class="editable-text" data-field="bad"></p></div>
+            <button onclick="deleteCurrentService()" style="width:100%; padding:15px; background:#ff3b30; color:#fff; border:none; border-radius:15px; font-size:16px; margin-top:10px;">🗑 Удалить услугу</button>
+        </div>
+    </div>
+
+    <!-- Модалка создания клиента -->
+    <div class="modal-overlay" id="newClientModal">
+        <div class="modal" style="border-radius:20px; padding:20px; margin:20px; max-width:400px; transform:translateY(0);">
+            <h2 style="margin-bottom:15px;">Новый клиент</h2>
+            <div class="input-group">
+                <label>Красивая ссылка (напр: ivanov)</label>
+                <input type="text" id="newAliasInp">
+            </div>
+            <div class="input-group">
+                <label>Имя клиента (ФИО)</label>
+                <input type="text" id="newNameInp">
+            </div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn secondary" onclick="closeModal('newClientModal')">Отмена</button>
+                <button class="btn success" onclick="createClientProcess()">Создать</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка долгого нажатия на клиента -->
+    <div class="modal-overlay" id="clientActionModal">
+        <div class="modal" style="border-radius:20px; padding:20px; margin:20px; max-width:400px; transform:translateY(0); text-align:center;">
+            <h2 id="actionClientName" style="margin-bottom:20px;">Клиент</h2>
+            <button class="btn" style="background:#ffcc00; color:#333;" id="toggleBlockBtn" onclick="toggleBlockClient()">Блокировать / Разблокировать</button>
+            <button class="btn" style="background:#ff3b30;" onclick="deleteClientProcess()">Удалить навсегда</button>
+            <button class="btn secondary" onclick="closeModal('clientActionModal')">Отмена</button>
+        </div>
+    </div>
+
     <script>
+        // Утилиты
         function utf8_to_b64(str) { return window.btoa(unescape(encodeURIComponent(str))); }
         function b64_to_utf8(str) { return decodeURIComponent(escape(window.atob(str))); }
-
-        let ghRepo = localStorage.getItem('ghRepo') || 'CoBceM-HuKTo/BusinessCard';
-        let ghToken = localStorage.getItem('ghToken') || '';
-        let currentEditingId = null;
-        let fileSha = null;
-        let appData = {};
-
-        const defaultData = {
-            name: "Новый Клиент", greeting: "Добрый день", avatar: "https://placehold.co/400x400/eeeeee/999999?text=Photo", phone: "79000000000", tg: "username", vk: "id000",
-            categories: ["Бизнес", "Строительство", "Здоровье"],
-            services: [{ id: 1, title: 'Услуга', category: 'Бизнес', exp: 'Опыт', good: 'Плюсы', bad: 'Минусы' }]
-        };
-
-        if (ghToken) { document.getElementById('repoInp').value = ghRepo; document.getElementById('tokenInp').value = ghToken; }
-
-        function showView(id) { document.querySelectorAll('.panel, #editorView').forEach(e => e.style.display = 'none'); document.getElementById(id).style.display = 'block'; }
+        function showView(id) { document.getElementById('authView').style.display='none'; document.getElementById('dashboardView').style.display='none'; document.getElementById('editorView').style.display='none'; document.getElementById(id).style.display='block'; }
         function showLoader(txt) { document.getElementById('loaderText').textContent = txt; document.getElementById('globalLoader').style.display = 'flex'; }
         function hideLoader() { document.getElementById('globalLoader').style.display = 'none'; }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-        function saveAuth() {
-            ghRepo = document.getElementById('repoInp').value.trim();
-            ghToken = document.getElementById('tokenInp').value.trim();
-            if(!ghToken) return alert("Введите токен!");
-            localStorage.setItem('ghRepo', ghRepo); localStorage.setItem('ghToken', ghToken);
-            showView('menuView');
+        // Показывать поле репозитория только если вводят 000000
+        document.getElementById('loginInp').addEventListener('input', (e) => {
+            document.getElementById('repoGroup').style.display = e.target.value === '000000' ? 'block' : 'none';
+        });
+
+        let activeMode = 'client'; // admin, client
+        let currentId = null;
+        let ghRepo = localStorage.getItem('ghRepo') || 'CoBceM-HuKTo/BusinessCard';
+        let ghToken = localStorage.getItem('ghToken') || '';
+        let fileSha = null; 
+        let appData = {};
+        
+        let clientsRegistry = [];
+        let registrySha = null;
+        let actionClientId = null;
+
+        // Если токен есть в памяти, подставляем
+        if(ghToken) document.getElementById('passInp').value = ghToken;
+
+        // --- ЛОГИКА АВТОРИЗАЦИИ ---
+        function login() {
+            const loginVal = document.getElementById('loginInp').value.trim();
+            const passVal = document.getElementById('passInp').value.trim();
+            
+            if (loginVal === '000000' && passVal.length > 10) {
+                // СУПЕР-АДМИН (Требуется Токен)
+                activeMode = 'admin';
+                ghRepo = document.getElementById('repoInp').value.trim();
+                ghToken = passVal;
+                localStorage.setItem('ghRepo', ghRepo);
+                localStorage.setItem('ghToken', ghToken);
+                document.getElementById('saveBtn').textContent = "💾 Сохранить в GitHub";
+                document.getElementById('backToDashBtn').style.display = 'block';
+                loadRegistry();
+            } else if (loginVal === passVal && loginVal.length > 0 && loginVal !== '000000') {
+                // ОБЫЧНЫЙ КЛИЕНТ
+                activeMode = 'client';
+                currentId = loginVal;
+                document.getElementById('saveBtn').textContent = "⬇ Скачать data.json";
+                document.getElementById('backToDashBtn').style.display = 'none'; // Клиенту некуда возвращаться
+                loadClientData(currentId, true);
+            } else {
+                alert("Неверные данные! Если вы создатель, логин 000000, пароль - токен GitHub. Если клиент - логин и пароль это ваш ID.");
+            }
         }
-        function logout() { localStorage.clear(); location.reload(); }
 
+        // --- API GITHUB ---
         async function githubReq(method, path, body = null) {
             const opts = { method, headers: { 'Authorization': `token ${ghToken}`, 'Accept': 'application/vnd.github.v3+json' } };
             if(body) opts.body = JSON.stringify(body);
@@ -125,90 +217,269 @@
             return await res.json();
         }
 
-        async function createNewClient() {
-            const link = document.getElementById('newLinkInp').value.trim();
-            const cid = document.getElementById('newIdInp').value.trim();
-            if(!link || !cid) return alert("Заполните оба поля");
-            showLoader("Создаем папки...");
+        // --- ЛОГИКА РЕЕСТРА КЛИЕНТОВ (Для Админа) ---
+        async function loadRegistry() {
+            showLoader("Загрузка базы клиентов...");
             try {
+                const res = await githubReq('GET', 'clients.json');
+                registrySha = res.sha;
+                clientsRegistry = JSON.parse(b64_to_utf8(res.content));
+            } catch(e) {
+                // Если файла нет (первый запуск), создаем его
+                clientsRegistry = [];
+                await saveRegistry();
+            }
+            hideLoader();
+            renderClientList();
+            showView('dashboardView');
+        }
+
+        async function saveRegistry() {
+            const content = utf8_to_b64(JSON.stringify(clientsRegistry, null, 2));
+            const body = { message: "Обновление реестра клиентов", content };
+            if(registrySha) body.sha = registrySha;
+            const res = await githubReq('PUT', 'clients.json', body);
+            registrySha = res.content.sha;
+        }
+
+        function renderClientList() {
+            const query = document.getElementById('searchClientInp').value.toLowerCase();
+            const container = document.getElementById('clientsListContainer');
+            container.innerHTML = '';
+            
+            const filtered = clientsRegistry.filter(c => c.name.toLowerCase().includes(query) || c.id.includes(query));
+            if(filtered.length === 0) container.innerHTML = '<p style="text-align:center; color:#888;">Клиентов нет</p>';
+
+            filtered.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'client-card';
+                div.innerHTML = `
+                    <div class="client-info">
+                        <h4>${c.name}</h4>
+                        <p>ID: ${c.id} | Ссылка: /${c.alias}</p>
+                    </div>
+                    <div class="status-badge ${c.blocked ? 'blocked' : 'active'}">${c.blocked ? 'Заблокирован' : 'Активен'}</div>
+                `;
+                
+                // Обработчики нажатий
+                let timer;
+                div.onmousedown = () => { timer = setTimeout(() => { openClientActionModal(c); }, 600); };
+                div.ontouchstart = () => { timer = setTimeout(() => { openClientActionModal(c); }, 600); };
+                const cancel = () => clearTimeout(timer);
+                div.onmouseup = cancel; div.onmouseleave = cancel; div.ontouchend = cancel; div.ontouchmove = cancel;
+                
+                // Короткий клик = Открыть редактор
+                div.onclick = () => { if(timer) clearTimeout(timer); loadClientData(c.id, false); };
+                
+                container.appendChild(div);
+            });
+        }
+
+        // --- СОЗДАНИЕ КЛИЕНТА (С АВТО-ID) ---
+        function showNewClientModal() {
+            document.getElementById('newAliasInp').value = '';
+            document.getElementById('newNameInp').value = '';
+            document.getElementById('newClientModal').classList.add('active');
+        }
+
+        async function createClientProcess() {
+            const alias = document.getElementById('newAliasInp').value.trim();
+            const name = document.getElementById('newNameInp').value.trim();
+            if(!alias || !name) return alert("Заполните оба поля!");
+            
+            // Вычисляем новый ID
+            let maxId = 0;
+            clientsRegistry.forEach(c => { const num = parseInt(c.id); if(num > maxId) maxId = num; });
+            const newId = String(maxId + 1).padStart(6, '0');
+
+            closeModal('newClientModal');
+            showLoader(`Создание ${newId}...`);
+
+            try {
+                // 1. Копируем template.html в папку alias
                 const tmpl = await githubReq('GET', 'template.html');
-                const html = b64_to_utf8(tmpl.content).replace('{{CLIENT_ID}}', cid);
-                await githubReq('PUT', `${link}/index.html`, { message: `Новый клиент ${link}`, content: utf8_to_b64(html) });
-                await githubReq('PUT', `${cid}/data.json`, { message: `База ${cid}`, content: utf8_to_b64(JSON.stringify(defaultData, null, 2)) });
-                hideLoader(); alert(`Создано! Ссылка: /${link}`);
-            } catch(e) { hideLoader(); alert("Ошибка. Проверьте токен и наличие template.html"); }
+                const html = b64_to_utf8(tmpl.content).replace('{{CLIENT_ID}}', newId);
+                await githubReq('PUT', `${alias}/index.html`, { message: `Визитка ${alias}`, content: utf8_to_b64(html) });
+                
+                // 2. Создаем базу data.json в папке ID
+                const newData = { name: name, greeting: "Добрый день", avatar: "https://placehold.co/400x400/eeeeee/999999?text=Фото", phone: "79000000000", tg: "username", vk: "id0", blocked: false, categories: ["Бизнес"], services: [{ id: 1, title: 'Услуга', category: 'Бизнес', exp: '-', good: '-', bad: '-' }] };
+                await githubReq('PUT', `${newId}/data.json`, { message: `База ${newId}`, content: utf8_to_b64(JSON.stringify(newData, null, 2)) });
+                
+                // 3. Обновляем реестр
+                clientsRegistry.push({ id: newId, alias: alias, name: name, blocked: false });
+                await saveRegistry();
+
+                hideLoader();
+                renderClientList();
+            } catch(e) { hideLoader(); alert("Ошибка при создании."); console.error(e); }
         }
 
-        async function loadClient() {
-            currentEditingId = document.getElementById('editIdInp').value.trim();
-            if(!currentEditingId) return;
-            showLoader("Загрузка...");
+        // --- УПРАВЛЕНИЕ КЛИЕНТОМ (Долгое нажатие) ---
+        function openClientActionModal(c) {
+            actionClientId = c.id;
+            document.getElementById('actionClientName').textContent = c.name + ` (${c.id})`;
+            document.getElementById('toggleBlockBtn').textContent = c.blocked ? '🟢 Разблокировать' : '🔴 Заблокировать';
+            document.getElementById('clientActionModal').classList.add('active');
+        }
+
+        async function toggleBlockClient() {
+            const client = clientsRegistry.find(c => c.id === actionClientId);
+            client.blocked = !client.blocked;
+            closeModal('clientActionModal');
+            showLoader("Изменение статуса...");
             try {
-                const res = await githubReq('GET', `${currentEditingId}/data.json`);
-                fileSha = res.sha;
-                appData = JSON.parse(b64_to_utf8(res.content));
+                // Меняем в реестре
+                await saveRegistry();
+                // Меняем в data.json клиента
+                const res = await githubReq('GET', `${client.id}/data.json`);
+                const cData = JSON.parse(b64_to_utf8(res.content));
+                cData.blocked = client.blocked;
+                await githubReq('PUT', `${client.id}/data.json`, { message: "Смена статуса", content: utf8_to_b64(JSON.stringify(cData, null, 2)), sha: res.sha });
+                hideLoader(); renderClientList();
+            } catch(e) { hideLoader(); alert("Ошибка!"); }
+        }
+
+        async function deleteClientProcess() {
+            if(!confirm("Удалить базу данных клиента навсегда? Это необратимо.")) return;
+            const client = clientsRegistry.find(c => c.id === actionClientId);
+            closeModal('clientActionModal');
+            showLoader("Удаление...");
+            try {
+                // Удаляем data.json
+                const res = await githubReq('GET', `${client.id}/data.json`);
+                await githubReq('DELETE', `${client.id}/data.json`, { message: "Удаление БД", sha: res.sha });
+                // Удаляем из реестра
+                clientsRegistry = clientsRegistry.filter(c => c.id !== actionClientId);
+                await saveRegistry();
+                hideLoader(); renderClientList();
+            } catch(e) { hideLoader(); alert("Ошибка при удалении."); }
+        }
+
+        // --- РЕДАКТОР ВИЗИТКИ (Общий) ---
+        async function loadClientData(id, isClientMode) {
+            currentId = id;
+            showLoader("Загрузка данных...");
+            try {
+                const res = await fetch(`../${currentId}/data.json?v=` + Date.now());
+                if(!res.ok) {
+                    if(activeMode === 'admin') {
+                        // Если админ, пробуем дернуть через API на случай кеширования
+                        const apiRes = await githubReq('GET', `${currentId}/data.json`);
+                        fileSha = apiRes.sha;
+                        appData = JSON.parse(b64_to_utf8(apiRes.content));
+                    } else { throw new Error(); }
+                } else {
+                    appData = await res.json();
+                    if(activeMode === 'admin') {
+                        const apiRes = await githubReq('GET', `${currentId}/data.json`);
+                        fileSha = apiRes.sha;
+                    }
+                }
                 hideLoader(); initEditor(); showView('editorView');
-            } catch(e) { hideLoader(); alert("Не найдена папка " + currentEditingId); }
+            } catch(e) { hideLoader(); alert(`Клиент ${currentId} не найден.`); }
         }
 
-        async function saveToGitHub() {
-            showLoader("Сохранение...");
-            try {
-                const res = await githubReq('PUT', `${currentEditingId}/data.json`, {
-                    message: "Обновление через админку", content: utf8_to_b64(JSON.stringify(appData, null, 2)), sha: fileSha
-                });
-                fileSha = res.content.sha;
-                hideLoader(); alert("Сохранено!");
-            } catch(e) { hideLoader(); alert("Ошибка сохранения."); }
-        }
-
-        // --- РЕДАКТОР ---
         function initEditor() {
             document.getElementById('nameText').textContent = appData.name;
             document.getElementById('greetingText').textContent = appData.greeting;
-            document.getElementById('avatarImg').src = appData.avatar;
+            document.getElementById('avatarImg').src = appData.avatar || 'https://placehold.co/400x400/eeeeee/999999?text=Фото';
             renderServices();
+            setupLongPressEditors(document.getElementById('editorView'));
         }
 
         function renderServices() {
             const list = document.getElementById('servicesList'); list.innerHTML = '';
             appData.services.forEach(s => {
                 const c = document.createElement('div'); c.className = 'card';
+                c.onclick = (e) => { if(!c.querySelector('[contenteditable="true"]')) openServiceModal(s); };
                 c.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                        <span style="font-size:12px; color:#888;">Кат: <b class="editable-text" data-sid="${s.id}" data-field="category">${s.category}</b></span>
-                        <button onclick="deleteService(${s.id})" style="border:none;background:none;color:red;">❌</button>
-                    </div>
-                    <div class="card-title editable-text" data-sid="${s.id}" data-field="title">${s.title}</div>
-                    <div style="background:#f4f5f7; padding:10px; border-radius:10px; margin-bottom:10px;">
-                        <div style="font-size:12px; color:#007aff;">Опыт:</div><div class="editable-text" data-sid="${s.id}" data-field="exp">${s.exp}</div>
-                    </div>
-                    <div style="background:#f4f5f7; padding:10px; border-radius:10px;">
-                        <div style="font-size:12px; color:#34c759;">Плюсы:</div><div class="editable-text" data-sid="${s.id}" data-field="good">${s.good}</div>
-                    </div>
+                    <div style="font-size:12px; color:#888; margin-bottom:10px;">Категория: <b class="editable-text" data-sid="${s.id}" data-field="category">${s.category}</b></div>
+                    <div style="font-size:18px; font-weight:bold;" class="editable-text" data-sid="${s.id}" data-field="title">${s.title}</div>
+                    <div style="font-size:13px; color:#007aff; margin-top:10px;">Нажмите для редактирования описания ➔</div>
                 `;
                 list.appendChild(c);
             });
-            setupLongPressEditors();
+            setupLongPressEditors(list);
         }
 
-        function setupLongPressEditors() {
-            document.querySelectorAll('.editable-text').forEach(el => {
+        // ФОТО: Загрузка с телефона и сжатие
+        function handlePhotoUpload(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_SIZE = 400; // Сжимаем до 400px
+                    let width = img.width; let height = img.height;
+                    if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
+                    else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    appData.avatar = compressedBase64;
+                    document.getElementById('avatarImg').src = compressedBase64;
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function setupLongPressEditors(container = document) {
+            container.querySelectorAll('.editable-text').forEach(el => {
                 let timer;
-                const start = () => { timer = setTimeout(() => { el.contentEditable=true; el.focus(); }, 500); };
+                const start = (e) => { if(e.type==='mousedown' && e.button !== 0) return; timer = setTimeout(() => { el.contentEditable=true; el.focus(); document.execCommand('selectAll', false, null); }, 500); };
                 const cancel = () => clearTimeout(timer);
+                el.onmousedown = null; el.ontouchstart = null;
                 el.onmousedown = start; el.ontouchstart = start; el.onmouseup = cancel; el.onmouseleave = cancel; el.ontouchend = cancel;
+                el.oncontextmenu = (e) => { if(el.isContentEditable) return true; e.preventDefault(); return false; };
                 el.onblur = () => {
                     el.contentEditable = false; const txt = el.textContent.trim();
-                    if(el.dataset.key) appData[el.dataset.key] = txt;
+                    if(el.dataset.key) { appData[el.dataset.key] = txt; if(el.dataset.key === 'name' && activeMode === 'admin') updateRegistryName(txt); }
                     else if(el.dataset.sid) appData.services.find(s => s.id == el.dataset.sid)[el.dataset.field] = txt;
                 };
             });
         }
-        function addService() { appData.services.push({ id: Date.now(), title: 'Новая', category: 'Бизнес', exp: '-', good: '-', bad: '-' }); renderServices(); }
-        function deleteService(id) { if(confirm("Удалить?")){ appData.services = appData.services.filter(s => s.id != id); renderServices(); } }
-        function editPhoto() { const url = prompt("Ссылка на фото:", appData.avatar); if(url){ appData.avatar = url; document.getElementById('avatarImg').src = url; } }
+
+        async function updateRegistryName(newName) {
+            const client = clientsRegistry.find(c => c.id === currentId);
+            if(client && client.name !== newName) {
+                client.name = newName;
+                await saveRegistry();
+            }
+        }
+
+        let activeServiceId = null;
+        function openServiceModal(s) {
+            activeServiceId = s.id;
+            ['Title','Exp','Good','Bad'].forEach(f => {
+                const el = document.getElementById('modal'+f);
+                el.textContent = s[f.toLowerCase()] || (f==='Title' ? '' : '-');
+                el.dataset.sid = s.id;
+            });
+            document.getElementById('serviceModalOverlay').classList.add('active');
+            setupLongPressEditors(document.getElementById('serviceModal'));
+        }
+
+        function addService() { appData.services.push({ id: Date.now(), title: 'Новая услуга', category: 'Разное', exp: 'Опишите опыт', good: 'Плюсы', bad: 'Минусы' }); renderServices(); window.scrollTo(0, document.body.scrollHeight); }
+        function deleteCurrentService() { if(confirm("Удалить услугу?")){ appData.services = appData.services.filter(s => s.id != activeServiceId); closeModal('serviceModalOverlay'); renderServices(); } }
+        function editContacts() { appData.phone = prompt("Телефон:", appData.phone) || appData.phone; appData.tg = prompt("Telegram:", appData.tg) || appData.tg; appData.vk = prompt("ВК:", appData.vk) || appData.vk; }
+
+        async function saveData() {
+            if(activeMode === 'admin') {
+                showLoader("Сохранение в GitHub...");
+                try {
+                    const res = await githubReq('PUT', `${currentId}/data.json`, { message: "Редакция от админа", content: utf8_to_b64(JSON.stringify(appData, null, 2)), sha: fileSha });
+                    fileSha = res.content.sha; hideLoader(); alert("Успешно сохранено!");
+                } catch(e) { hideLoader(); alert("Ошибка сохранения."); }
+            } else {
+                const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2)); a.download = "data.json"; document.body.appendChild(a); a.click(); a.remove();
+                alert(`Файл скачан! Отправьте его владельцу системы.`);
+            }
+        }
     </script>
 </body>
 </html>
-
