@@ -1,7 +1,7 @@
 {
-  "name": "Новый Клиент",
+  "name": "Хуесос",
   "greeting": "Добрый день",
-  "avatar": "https://placehold.co/400x400/eeeeee/999999?text=Photo",
+  "avatar": "https://avatars.mds.yandex.net/i?id=562c2ed1a6ff10d55189712861985897_l-12716919-images-thumbs&n=13",
   "phone": "79000000000",
   "tg": "username",
   "vk": "id000",
@@ -13,10 +13,10 @@
   "services": [
     {
       "id": 1,
-      "title": "Услуга",
-      "category": "Бизнес",
-      "exp": "Опыт",
-      "good": "Плюсы",
+      "title": "аааа",
+      "category": "апапапа",
+      "exp": "был",
+      "good": "минусы",
       "bad": "Минусы"
     }
   ]
