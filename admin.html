@@ -89,8 +89,8 @@
 
     <div id="menuView" class="panel" style="display: none;">
         <h2>Панель Создателя</h2>
-        <button class="btn dark" onclick="openTemplateEditor()" style="margin-bottom: 25px;">🛠 Редактировать template.html</button>
-        <button class="btn" onclick="showView('dashboardView')" style="margin-bottom: 25px;">👥 База клиентов</button>
+        <button class="btn dark" onclick="openTemplateEditor()" style="margin-bottom: 25px;">🛠 Редактировать шаблон</button>
+        <button class="btn" onclick="openDashboard()" style="margin-bottom: 25px;">👥 База клиентов</button>
         <button class="btn secondary" style="margin-top:10px;" onclick="location.reload()">Выйти</button>
     </div>
 
@@ -106,11 +106,11 @@
 
     <div id="editorView">
         <div class="admin-topbar">
-            <button class="admin-btn secondary" id="backToDashBtn" onclick="showView('dashboardView')">⬅ Назад</button>
+            <button class="admin-btn secondary" id="backToDashBtn" onclick="openDashboard()">⬅ Назад</button>
             <button class="admin-btn" onclick="addService()">+ Услуга</button>
             <input type="file" id="photoUploader" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
             <button class="admin-btn" onclick="document.getElementById('photoUploader').click()">🖼 Фото</button>
-            <button class="admin-btn" onclick="editContacts()">🔗 Контакты</button>
+            <button class="admin-btn" onclick="openContactsModal()">🔗 Контакты</button>
             <button class="admin-btn success" id="saveBtn" onclick="saveData()">💾 Сохранить</button>
         </div>
         <header class="header">
@@ -130,7 +130,28 @@
         </div>
     </div>
 
-    <!-- Модалка услуги -->
+    <!-- Модалка управления Контактами и своими Ссылками -->
+    <div class="modal-overlay" id="contactsModalOverlay">
+        <div class="modal" style="border-radius:20px; padding:20px; margin:20px; max-width:400px; transform:translateY(0);">
+            <h2 style="margin-bottom:15px;">Контакты и Ссылки</h2>
+            
+            <div class="input-group"><label>Телефон (через 7, без +)</label><input type="text" id="inpPhone"></div>
+            <div class="input-group"><label>Telegram (без @)</label><input type="text" id="inpTg"></div>
+            <div class="input-group"><label>ID ВКонтакте</label><input type="text" id="inpVk"></div>
+            
+            <h3 style="font-size:14px; margin:20px 0 10px;">Свои кнопки (Сайт, другие сети)</h3>
+            <div id="customLinksList"></div>
+            
+            <input type="file" id="customIconUploader" accept="image/*,.svg" style="display:none" onchange="handleCustomIconUpload(event)">
+            <button class="btn secondary" style="font-size:14px; padding:10px;" onclick="startAddCustomLink()">+ Добавить свою кнопку</button>
+            
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn secondary" onclick="closeModal('contactsModalOverlay')">Отмена</button>
+                <button class="btn success" onclick="saveContactsFromModal()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="serviceModalOverlay">
         <div class="modal" id="serviceModal">
             <div class="modal-header">
@@ -144,7 +165,6 @@
         </div>
     </div>
 
-    <!-- Новые клиенты -->
     <div class="modal-overlay" id="newClientModal">
         <div class="modal" style="border-radius:20px; padding:20px; margin:20px; max-width:400px; transform:translateY(0);">
             <h2 style="margin-bottom:15px;">Новый клиент</h2>
@@ -163,7 +183,6 @@
         </div>
     </div>
 
-    <!-- Управление клиентом -->
     <div class="modal-overlay" id="clientActionModal">
         <div class="modal" style="border-radius:20px; padding:20px; margin:20px; max-width:400px; transform:translateY(0); text-align:center;">
             <h2 id="actionClientName" style="margin-bottom:20px;">Клиент</h2>
@@ -188,7 +207,7 @@
         let fileSha = null; let templateSha = null; let appData = {};
         let clientsRegistry = []; let registrySha = null; let actionClientId = null;
 
-        const defaultData = { name: "Новый Клиент", greeting: "Добрый день", avatar: "https://placehold.co/400x400/eeeeee/999999?text=Фото", phone: "79000000000", tg: "username", vk: "id0", categories: ["Бизнес"], services: [] };
+        const defaultData = { name: "Новый Клиент", greeting: "Добрый день", avatar: "https://placehold.co/400x400/eeeeee/999999?text=Фото", phone: "79000000000", tg: "username", vk: "id0", customLinks: [], categories: ["Бизнес"], services: [] };
 
         if(ghToken) document.getElementById('tokenInp').value = ghToken;
 
@@ -198,7 +217,6 @@
             else { document.getElementById('tabAdmin').classList.add('active'); document.getElementById('formClient').style.display = 'none'; document.getElementById('formAdmin').style.display = 'block'; }
         }
 
-        // ВХОД КЛИЕНТА
         function loginAsClient() {
             const login = document.getElementById('clientLoginInp').value.trim();
             const pass = document.getElementById('clientPassInp').value.trim();
@@ -209,14 +227,12 @@
             document.getElementById('backToDashBtn').style.display = 'none'; 
             
             showLoader("Загрузка визитки...");
-            // ИСПРАВЛЕН БАГ С ПУТЯМИ! Больше нет '../'
             fetch(`${currentId}/data.json?v=` + Date.now())
                 .then(res => { if(!res.ok) throw new Error(); return res.json(); })
                 .then(data => { appData = data; hideLoader(); initEditor(); showView('editorView'); })
                 .catch(err => { hideLoader(); alert(`Клиент ${currentId} не найден.`); });
         }
 
-        // ВХОД АДМИНА
         function loginAsAdmin() {
             ghRepo = document.getElementById('repoInp').value.trim();
             ghToken = document.getElementById('tokenInp').value.trim();
@@ -239,7 +255,6 @@
                 const res = await githubReq('GET', 'clients.json');
                 registrySha = res.sha; clientsRegistry = JSON.parse(b64_to_utf8(res.content));
             } catch(e) { clientsRegistry = []; await saveRegistry(); }
-            renderClientList();
         }
 
         async function saveRegistry() {
@@ -247,6 +262,13 @@
             if(registrySha) body.sha = registrySha;
             const res = await githubReq('PUT', 'clients.json', body);
             registrySha = res.content.sha;
+        }
+
+        // ОТКРЫТИЕ ДАШБОРДА И ЖЕСТКИЙ СБРОС ПОИСКА
+        function openDashboard() {
+            document.getElementById('searchClientInp').value = '';
+            renderClientList();
+            showView('dashboardView');
         }
 
         function renderClientList() {
@@ -287,7 +309,7 @@
                 await githubReq('PUT', `${newId}/data.json`, { message: `База ${newId}`, content: utf8_to_b64(JSON.stringify(newData, null, 2)) });
                 clientsRegistry.push({ id: newId, alias: alias, name: name, blocked: false });
                 await saveRegistry(); hideLoader(); renderClientList();
-            } catch(e) { hideLoader(); alert("Ошибка при создании. Убедитесь, что файл template.html существует."); }
+            } catch(e) { hideLoader(); alert("Ошибка при создании. Убедитесь, что template.html существует."); }
         }
 
         function openClientActionModal(c) {
@@ -326,6 +348,7 @@
             try {
                 const apiRes = await githubReq('GET', `${currentId}/data.json`);
                 fileSha = apiRes.sha; appData = JSON.parse(b64_to_utf8(apiRes.content));
+                if(!appData.customLinks) appData.customLinks = [];
                 hideLoader(); initEditor(); showView('editorView');
             } catch(e) { hideLoader(); alert("Не найдена папка " + currentId); }
         }
@@ -414,8 +437,73 @@
 
         function addService() { appData.services.push({ id: Date.now(), title: 'Новая услуга', category: 'Разное', exp: 'Опишите опыт', good: 'Плюсы', bad: 'Минусы' }); renderServices(); window.scrollTo(0, document.body.scrollHeight); }
         function deleteService(id) { if(confirm("Удалить услугу?")){ appData.services = appData.services.filter(s => s.id != id); closeModal('serviceModalOverlay'); renderServices(); } }
-        function editContacts() { appData.phone = prompt("Телефон:", appData.phone) || appData.phone; appData.tg = prompt("Telegram:", appData.tg) || appData.tg; appData.vk = prompt("ВК:", appData.vk) || appData.vk; }
 
+        // --- УПРАВЛЕНИЕ КОНТАКТАМИ И КАСТОМНЫМИ ССЫЛКАМИ ---
+        function openContactsModal() {
+            document.getElementById('inpPhone').value = appData.phone || '';
+            document.getElementById('inpTg').value = appData.tg || '';
+            document.getElementById('inpVk').value = appData.vk || '';
+            renderCustomLinks();
+            document.getElementById('contactsModalOverlay').classList.add('active');
+        }
+
+        function saveContactsFromModal() {
+            appData.phone = document.getElementById('inpPhone').value.trim();
+            appData.tg = document.getElementById('inpTg').value.trim();
+            appData.vk = document.getElementById('inpVk').value.trim();
+            closeModal('contactsModalOverlay');
+        }
+
+        let pendingCustomUrl = '';
+        function startAddCustomLink() {
+            pendingCustomUrl = prompt('Введите ссылку на сайт/сеть (с https://):');
+            if(pendingCustomUrl) {
+                document.getElementById('customIconUploader').click();
+            }
+        }
+
+        function handleCustomIconUpload(event) {
+            const file = event.target.files[0]; if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 100; canvas.height = 100; 
+                    canvas.getContext('2d').drawImage(img, 0, 0, 100, 100);
+                    const b64 = canvas.toDataURL(file.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.9);
+                    if(!appData.customLinks) appData.customLinks = [];
+                    appData.customLinks.push({ id: Date.now(), url: pendingCustomUrl, icon: b64 });
+                    renderCustomLinks();
+                    event.target.value = ''; 
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function renderCustomLinks() {
+            const container = document.getElementById('customLinksList');
+            container.innerHTML = '';
+            if(!appData.customLinks) return;
+            appData.customLinks.forEach(link => {
+                container.innerHTML += `
+                <div style="display:flex; align-items:center; justify-content:space-between; background:#f4f5f7; padding:10px; border-radius:10px; margin-bottom:10px;">
+                    <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
+                        <img src="${link.icon}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
+                        <span style="font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:150px;">${link.url}</span>
+                    </div>
+                    <button onclick="removeCustomLink(${link.id})" style="background:none; border:none; color:red; font-size:16px;">❌</button>
+                </div>`;
+            });
+        }
+
+        function removeCustomLink(id) {
+            appData.customLinks = appData.customLinks.filter(l => l.id != id);
+            renderCustomLinks();
+        }
+
+        // СОХРАНЕНИЕ
         async function saveData() {
             if(activeMode === 'admin') {
                 showLoader("В GitHub...");
