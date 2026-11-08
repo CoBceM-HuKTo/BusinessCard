@@ -1,1 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#f4f5f7" id="metaThemeColor">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Загрузка...</title>
+    <style>
+        /* CSS Переменные для Светлой и Темной темы */
+        :root {
+            --bg: #f4f5f7; --text: #1d1d1f; --text-muted: #86868b; --card-bg: #ffffff;
+            --accent: #007aff; --radius: 20px; --border-color: rgba(0, 0, 0, 0.08);
+            --glass-bg: rgba(244, 245, 247, 0.85); --modal-bg: #ffffff; --input-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg: #000000; --text: #f5f5f7; --text-muted: #a1a1a6; --card-bg: #1c1c1e;
+            --border-color: rgba(255, 255, 255, 0.15); --glass-bg: rgba(28, 28, 30, 0.85);
+            --modal-bg: #1c1c1e; --input-bg: #2c2c2e;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background: var(--bg); color: var(--text); padding-bottom: 100px; -webkit-tap-highlight-color: transparent; transition: background-color 0.3s, color 0.3s; }
+        body.modal-open { overflow: hidden; touch-action: none; }
+        
+        .container { max-width: 480px; margin: 0 auto; position: relative; min-height: 100vh; background: var(--bg); box-shadow: 0 0 20px rgba(0,0,0,0.05); transition: background-color 0.3s; }
+        
+        /* Верхние кнопки управления */
+        .top-bar { position: absolute; top: 30px; left: 15px; right: 15px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+        .top-btn { background: var(--card-bg); border: 1px solid var(--border-color); height: 40px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: 0.2s; color: var(--text); padding: 0 15px; gap: 8px; }
+        .top-btn.icon-only { width: 40px; padding: 0; border-radius: 50%; font-size: 20px; }
+        .top-btn:active { transform: scale(0.95); }
+        .top-bar-group { display: flex; gap: 10px; }
+
+        /* Header */
+        .header { padding: 80px 20px 20px; text-align: center; }
+        .greeting { font-size: 14px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .avatar { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 4px solid var(--accent); box-shadow: 0 10px 20px rgba(0,122,255,0.2); background: #eee; }
+        .name { font-size: 24px; font-weight: 700; margin-bottom: 5px; }
+        
+        /* Sticky Controls */
+        .controls { position: sticky; top: 0; background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 15px 20px; z-index: 100; border-bottom: 1px solid var(--border-color); transition: background-color 0.3s; }
+        .search-box { width: 100%; padding: 12px 20px; border-radius: var(--radius); border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text); box-shadow: 0 4px 10px rgba(0,0,0,0.03); font-size: 16px; outline: none; margin-bottom: 15px; transition: 0.3s; }
+        .search-box:focus { box-shadow: 0 4px 15px rgba(0,122,255,0.2); border-color: var(--accent); }
+        .search-box::placeholder { color: var(--text-muted); }
+        
+        .categories { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .categories::-webkit-scrollbar { display: none; }
+        .cat-btn { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-muted); font-size: 14px; font-weight: 600; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; transition: 0.3s; }
+        .cat-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+        
+        /* Services Grid */
+        .services { padding: 20px; display: grid; gap: 15px; grid-template-columns: 1fr; }
+        .card { background: var(--card-bg); padding: 20px; border-radius: var(--radius); box-shadow: 0 4px 15px rgba(0,0,0,0.04); border: 1px solid var(--border-color); border-left: 5px solid var(--cat-color, var(--accent)); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s; position: relative; overflow: hidden; }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--cat-color); opacity: 0.05; pointer-events: none; }
+        .card:active { transform: scale(0.98); }
+        .card-title { font-size: 18px; font-weight: 600; margin-bottom: 10px; position: relative; z-index: 2; }
+        .card-hint { font-size: 13px; color: var(--text-muted); font-weight: 500; display: flex; justify-content: space-between; align-items: center; margin-top: 15px; position: relative; z-index: 2; }
+        
+        /* Category specific accent colors */
+        [data-cat="Обучение"] { --cat-color: #34c759; } [data-cat="Бизнес"] { --cat-color: #007aff; }
+        [data-cat="Строительство"] { --cat-color: #ff9500; } [data-cat="Недвижимость"] { --cat-color: #af52de; }
+        [data-cat="Здоровье"] { --cat-color: #ff2d55; } [data-cat="Общество"] { --cat-color: #ffcc00; }
+        [data-cat="Транспорт"] { --cat-color: #5856d6; } [data-cat="СМИ"] { --cat-color: #8e8e93; }
+        
+        /* Floating Oval Menu */
+        .footer { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: max-content; background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 12px 18px; display: flex; gap: 12px; border-radius: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 1px solid var(--border-color); z-index: 100; transition: transform 0.4s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.3s; }
+        body.search-focused .footer { transform: translate(-50%, 120px); opacity: 0; pointer-events: none; }
+        
+        .action-btn { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: 0.2s; color: #fff; }
+        .action-btn:active { transform: scale(0.92); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn-phone { background: linear-gradient(135deg, #34c759, #28a745); } .btn-vk { background: linear-gradient(135deg, #0077FF, #005ce6); } .btn-tg { background: linear-gradient(135deg, #2AABEE, #229ED9); } .btn-wa { background: linear-gradient(135deg, #25D366, #128C7E); } .btn-share { background: linear-gradient(135deg, #AF52DE, #5856D6); } 
+        .action-btn svg { width: 22px; height: 22px; fill: currentColor; }
+        
+        /* Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); opacity: 0; pointer-events: none; transition: 0.3s; z-index: 999; backdrop-filter: blur(5px); display: flex; align-items: flex-end; justify-content: center; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal { background: var(--modal-bg); border-top: 1px solid var(--border-color); width: 100%; max-width: 480px; border-radius: 30px 30px 0 0; padding: 25px 20px 30px; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.1, 0.9, 0.2, 1); max-height: 90vh; overflow-y: auto; touch-action: pan-y; display: flex; flex-direction: column; }
+        .modal-overlay.active .modal { transform: translateY(0); }
+        .modal-swipe-line { width: 40px; height: 5px; background: var(--border-color); border-radius: 3px; margin: 0 auto 15px; flex-shrink: 0; }
+        .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-shrink: 0; }
+        .modal-header h2 { font-size: 22px; margin: 0; padding-right: 15px; color: var(--text); }
+        .modal-close-btn { background: var(--bg); border: 1px solid var(--border-color); font-size: 28px; line-height: 1; color: var(--text-muted); cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; transition: 0.2s; flex-shrink: 0; }
+        .modal-section { margin-bottom: 15px; background: var(--bg); border: 1px solid var(--border-color); padding: 15px; border-radius: 15px; flex-shrink: 0; }
+        .modal-section h3 { font-size: 15px; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
+        .modal-section p { font-size: 15px; line-height: 1.5; color: var(--text); white-space: pre-wrap; }
+        .sec-exp h3 { color: #007aff; } .sec-good h3 { color: #34c759; } .sec-bad h3 { color: #ff3b30; }
+        .modal-footer { margin-top: 15px; padding-top: 20px; border-top: 1px solid var(--border-color); display: flex; gap: 12px; justify-content: center; flex-shrink: 0; }
+        .modal-footer .action-btn { width: 44px; height: 44px; }
+        .modal-footer .action-btn svg { width: 20px; height: 20px; }
+        
+        .qr-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 0; }
+        .qr-container img { background: #fff; padding: 15px; border-radius: 20px; width: 250px; height: 250px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--border-color); }
+        .qr-hint { margin-top: 15px; text-align: center; color: var(--text-muted); font-size: 14px; }
+        
+        .confirm-btn-group { display: flex; gap: 15px; margin-top: 20px; width: 100%; }
+        .confirm-btn { flex: 1; padding: 14px; border-radius: 20px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; border: none; text-align: center; }
+        .confirm-btn:active { transform: scale(0.95); }
+        .btn-cancel { background: var(--bg); color: var(--text); border: 1px solid var(--border-color); }
+        .btn-accept { background: var(--accent); color: #fff; box-shadow: 0 4px 15px rgba(0,122,255,0.3); }
+        
+        /* Экран загрузки */
+        #loader { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; font-weight: 600; color: var(--text-muted); transition: 0.3s; }
+    </style>
+</head>
+<body>
+    <div id="loader">Загрузка данных...</div>
+    <div class="container" style="opacity: 0; transition: opacity 0.5s;" id="mainContainer">
+        
+        <!-- Верхние кнопки -->
+        <div class="top-bar">
+            <button class="top-btn icon-only" id="themeToggleBtn" title="Переключить тему">🌙</button>
+            <div class="top-bar-group">
+                <button class="top-btn" id="vcardBtn" title="Сохранить контакт">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm6 12H6v-1.4c0-2 4-3.1 6-3.1s6 1.1 6 3.1V18z"/></svg> Сохранить
+                </button>
+                <button class="top-btn icon-only" id="qrBtn" title="Показать QR-код">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M3 3h8v8H3V3zm2 2v4h4V5H5zm8-2h8v8h-8V3zm2 2v4h4V5h-4zM3 13h8v8H3v-8zm2 2v4h4v-4H5zm13-2h3v2h-3v-2zm-3 0h2v2h-2v-2zm3 3h3v2h-3v-2zm-3 0h2v2h-2v-2zm3 3h3v2h-3v-2zm-3 0h2v2h-2v-2zm-2-6h2v8h-2v-8z"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Шапка -->
+        <header class="header" id="header">
+            <p id="greetingText" class="greeting">Добрый день</p>
+            <img id="avatarImage" src="" alt="Фото" class="avatar">
+            <h1 class="name" id="nameText">Загрузка...</h1>
+        </header>
+
+        <!-- Поиск и Фильтры -->
+        <div class="controls">
+            <input type="text" id="searchInput" class="search-box" placeholder="Поиск услуг...">
+            <div class="categories" id="categoriesBox"></div>
+        </div>
+
+        <!-- Список -->
+        <div class="services" id="servicesList"></div>
+
+        <!-- Плавающее Меню -->
+        <footer class="footer">
+            <a href="#" id="mainPhone" class="action-btn btn-phone" onclick="haptic()"><svg viewBox="0 0 24 24"><path d="M20 15.5c-1.2 0-2.4-.2-3.6-.6-.3-.1-.7 0-1 .2l-2.2 2.2c-2.8-1.4-5.1-3.8-6.6-6.6l2.2-2.2c.3-.3.4-.7.2-1-.3-1.1-.5-2.3-.5-3.5 0-.6-.4-1-1-1H4c-.6 0-1 .4-1 1 0 9.4 7.6 17 17 17 .6 0 1-.4 1-1v-3.5c0-.6-.4-1-1-1zM19 12h2a9 9 0 0 0-9-9v2c3.9 0 7.1 3.1 7.1 7z"/></svg></a>
+            <a href="#" id="mainVk" target="_blank" class="action-btn btn-vk" onclick="haptic()"><svg viewBox="0 0 24 24"><path d="M15.08 2.37A11.75 11.75 0 0 0 12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10c0-1.07-.17-2.1-.48-3.1.28.32.48.74.48 1.1A10 10 0 1 1 12 2a9.9 9.9 0 0 1 3.08.49V2.37z" opacity=".2"/><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12s4.48 10 10 10 10-4.48 10-10zm-6.62 1.48c.17.2.35.4.52.6.48.57 1 1.15 1.5 1.76.12.15.2.3.26.47.04.1-.03.22-.16.22h-1.93c-.47 0-.82-.2-1.1-.55-.38-.47-.78-.93-1.14-1.42-.12-.15-.27-.22-.44-.15-.43.15-.65.48-.65.94v.93c0 .16-.1.25-.26.25h-1.28c-1.6 0-3-.55-4.2-1.6-1.52-1.35-2.6-3.08-3.37-5-.06-.15.02-.25.17-.25h2c.1 0 .17.06.22.16.53 1.43 1.25 2.7 2.3 3.7.15.15.3.18.45.06.18-.16.27-.4.27-.66V9.8c0-.28.16-.4.4-.4h2.18c.23 0 .33.1.33.32v2.58c0 .32.14.47.38.4.15-.05.28-.15.4-.26.4-.45.76-.94 1.1-1.44.13-.18.3-.25.5-.25h1.9c.14 0 .22.06.2.2-.07.2-.18.4-.3.6-.45.6-.9 1.18-1.35 1.76-.23.27-.23.53.03.8z"/></svg></a>
+            <a href="#" id="mainTg" target="_blank" class="action-btn btn-tg" onclick="haptic()"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.46.93-4.12 2.73-.39.26-.74.39-1.06.38-.35-.01-1.02-.2-1.52-.36-.61-.2-1.1-.3-1.07-.63.02-.17.26-.35.73-.54 2.86-1.24 4.76-2.06 5.71-2.46 2.72-1.14 3.28-1.34 3.65-1.35.08 0 .26.02.37.1.09.07.13.17.15.28 0 .04.01.12 0 .28z"/></svg></a>
+            <a href="#" id="mainWa" target="_blank" class="action-btn btn-wa" onclick="haptic()"><svg viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zm5.46 14.1c-.26.74-1.53 1.4-2.12 1.48-.54.07-1.18.15-3.32-.74-2.58-1.07-4.22-3.7-4.35-3.87-.13-.17-1.04-1.38-1.04-2.63 0-1.25.65-1.87.88-2.12.23-.25.5-.31.66-.31h.47c.18 0 .42-.07.64.48.23.56.77 1.88.84 2.03.07.15.11.32.02.5-.09.18-.13.3-.26.45-.13.15-.28.32-.4.45-.13.13-.26.27-.11.53.15.26.66 1.09 1.42 1.76.98.88 1.8 1.15 2.06 1.28.26.13.41.11.56-.06.15-.17.64-.74.82-.99.18-.25.35-.21.58-.12.23.09 1.46.69 1.71.81.25.12.42.18.48.28.06.1.06.58-.2 1.32z"/></svg></a>
+            <button class="action-btn btn-share" onclick="haptic(); shareProfile()"><svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg></button>
+        </footer>
+
+        <!-- Окна -->
+        <div class="modal-overlay" id="serviceModalOverlay">
+            <div class="modal" id="serviceModal">
+                <div class="modal-swipe-line"></div>
+                <div class="modal-header"><h2 id="modalTitle">Заголовок</h2><button class="modal-close-btn" onclick="closeModal('serviceModalOverlay', 'serviceModal')">×</button></div>
+                <div class="modal-section sec-exp"><h3>💼 Мой опыт</h3><p id="modalExp">Текст опыта...</p></div>
+                <div class="modal-section sec-good" id="goodSection"><h3>🔥 В чем я крут</h3><p id="modalGood">Текст...</p></div>
+                <div class="modal-section sec-bad" id="badSection"><h3>⚠️ В чем я плох</h3><p id="modalBad">Текст...</p></div>
+                <div class="modal-footer">
+                    <a href="#" id="modalWaBtn" target="_blank" class="action-btn btn-wa" onclick="haptic()"><svg viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zm5.46 14.1c-.26.74-1.53 1.4-2.12 1.48-.54.07-1.18.15-3.32-.74-2.58-1.07-4.22-3.7-4.35-3.87-.13-.17-1.04-1.38-1.04-2.63 0-1.25.65-1.87.88-2.12.23-.25.5-.31.66-.31h.47c.18 0 .42-.07.64.48.23.56.77 1.88.84 2.03.07.15.11.32.02.5-.09.18-.13.3-.26.45-.13.15-.28.32-.4.45-.13.13-.26.27-.11.53.15.26.66 1.09 1.42 1.76.98.88 1.8 1.15 2.06 1.28.26.13.41.11.56-.06.15-.17.64-.74.82-.99.18-.25.35-.21.58-.12.23.09 1.46.69 1.71.81.25.12.42.18.48.28.06.1.06.58-.2 1.32z"/></svg></a>
+                    <a href="#" id="modalTgBtn" target="_blank" class="action-btn btn-tg" onclick="haptic()"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.46.93-4.12 2.73-.39.26-.74.39-1.06.38-.35-.01-1.02-.2-1.52-.36-.61-.2-1.1-.3-1.07-.63.02-.17.26-.35.73-.54 2.86-1.24 4.76-2.06 5.71-2.46 2.72-1.14 3.28-1.34 3.65-1.35.08 0 .26.02.37.1.09.07.13.17.15.28 0 .04.01.12 0 .28z"/></svg></a>
+                    <a href="#" id="modalVkBtn" target="_blank" class="action-btn btn-vk" onclick="haptic()"><svg viewBox="0 0 24 24"><path d="M15.08 2.37A11.75 11.75 0 0 0 12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10c0-1.07-.17-2.1-.48-3.1.28.32.48.74.48 1.1A10 10 0 1 1 12 2a9.9 9.9 0 0 1 3.08.49V2.37z" opacity=".2"/><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12s4.48 10 10 10 10-4.48 10-10zm-6.62 1.48c.17.2.35.4.52.6.48.57 1 1.15 1.5 1.76.12.15.2.3.26.47.04.1-.03.22-.16.22h-1.93c-.47 0-.82-.2-1.1-.55-.38-.47-.78-.93-1.14-1.42-.12-.15-.27-.22-.44-.15-.43.15-.65.48-.65.94v.93c0 .16-.1.25-.26.25h-1.28c-1.6 0-3-.55-4.2-1.6-1.52-1.35-2.6-3.08-3.37-5-.06-.15.02-.25.17-.25h2c.1 0 .17.06.22.16.53 1.43 1.25 2.7 2.3 3.7.15.15.3.18.45.06.18-.16.27-.4.27-.66V9.8c0-.28.16-.4.4-.4h2.18c.23 0 .33.1.33.32v2.58c0 .32.14.47.38.4.15-.05.28-.15.4-.26.4-.45.76-.94 1.1-1.44.13-.18.3-.25.5-.25h1.9c.14 0 .22.06.2.2-.07.2-.18.4-.3.6-.45.6-.9 1.18-1.35 1.76-.23.27-.23.53.03.8z"/></svg></a>
+                    <button id="modalShareBtn" class="action-btn btn-share" onclick="haptic()"><svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="vcardModalOverlay">
+            <div class="modal" id="vcardModal">
+                <div class="modal-swipe-line"></div>
+                <div class="modal-header"><h2>Сохранение контакта</h2><button class="modal-close-btn" onclick="closeModal('vcardModalOverlay', 'vcardModal')">×</button></div>
+                <p style="text-align: center; font-size: 16px; margin-bottom: 10px; color: var(--text);">Добавить <span id="vcardNameText"></span> в контакты телефона?</p>
+                <div class="confirm-btn-group">
+                    <button class="confirm-btn btn-cancel" onclick="closeModal('vcardModalOverlay', 'vcardModal'); haptic();">Отмена</button>
+                    <button class="confirm-btn btn-accept" onclick="downloadVCard()">Да, сохранить</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="qrModalOverlay">
+            <div class="modal" id="qrModal">
+                <div class="modal-swipe-line"></div>
+                <div class="modal-header"><h2>QR-код</h2><button class="modal-close-btn" onclick="closeModal('qrModalOverlay', 'qrModal')">×</button></div>
+                <div class="qr-container">
+                    <img id="qrImage" src="" alt="QR код">
+                    <p class="qr-hint">Отсканируйте, чтобы открыть визитку</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- ПАРАМЕТРЫ КЛИЕНТА (АДМИНКА ЗАМЕНИТ ЭТУ СТРОКУ ПРИ СОЗДАНИИ ВИЗИТКИ) ---
+        const CLIENT_ID = "{{CLIENT_ID}}";
+        
+        let db = {};
+        
+        // Визитка сама обращается в папку с ID и скачивает свою базу данных
+        fetch(`../${CLIENT_ID}/data.json?v=` + new Date().getTime())
+            .then(res => res.json())
+            .then(data => {
+                db = data;
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('mainContainer').style.opacity = '1';
+                document.title = db.name;
+                initApp();
+            })
+            .catch(err => {
+                document.getElementById('loader').innerHTML = 'Ошибка загрузки данных :(<br>Возможно, база данных еще не создана.';
+                console.error(err);
+            });
+
+        let currentFilter = 'Все';
+
+        function initApp() {
+            document.getElementById('mainPhone').href = `tel:+${db.phone}`;
+            document.getElementById('mainWa').href = `https://wa.me/${db.phone}`;
+            document.getElementById('mainTg').href = `https://t.me/${db.tg}`;
+            document.getElementById('mainVk').href = `https://vk.com/${db.vk}`;
+
+            document.getElementById('nameText').textContent = db.name;
+            document.getElementById('vcardNameText').textContent = db.name;
+            document.getElementById('greetingText').textContent = db.greeting;
+            document.getElementById('avatarImage').src = db.avatar;
+
+            const hour = new Date().getHours();
+            const g = document.getElementById('greetingText');
+            if(hour >= 5 && hour < 12) g.textContent = 'Доброе утро';
+            else if(hour >= 12 && hour < 18) g.textContent = 'Добрый день';
+            else g.textContent = 'Добрый вечер';
+
+            const catBox = document.getElementById('categoriesBox');
+            catBox.innerHTML = '<button class="cat-btn active" data-filter="Все">Все</button>';
+            db.categories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'cat-btn';
+                btn.setAttribute('data-filter', cat);
+                btn.textContent = cat;
+                catBox.appendChild(btn);
+            });
+
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    haptic();
+                    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentFilter = btn.getAttribute('data-filter');
+                    renderCards(document.getElementById('searchInput').value);
+                });
+            });
+
+            renderCards();
+
+            const params = new URLSearchParams(window.location.search);
+            const serviceId = params.get('service');
+            if (serviceId) {
+                const s = db.services.find(x => x.id == serviceId);
+                if (s) setTimeout(() => openServiceModal(s), 400); 
+            }
+        }
+
+        function renderCards(query = '') {
+            const list = document.getElementById('servicesList');
+            list.innerHTML = '';
+            const q = query.toLowerCase();
+            
+            const filtered = db.services.filter(s => {
+                const matchText = s.title.toLowerCase().includes(q) || s.exp.toLowerCase().includes(q);
+                const matchCat = currentFilter === 'Все' || s.category === currentFilter;
+                return matchText && matchCat;
+            });
+
+            if (filtered.length === 0) {
+                list.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Ничего не найдено <br><a href="#" onclick="clearSearch()" style="color:var(--accent); text-decoration:none;">Очистить поиск</a></p>';
+                return;
+            }
+
+            filtered.forEach(s => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.setAttribute('data-cat', s.category);
+                card.onclick = () => { haptic(); openServiceModal(s); };
+                card.innerHTML = `<div class="card-title">${s.title}</div><div class="card-hint">Подробнее <span style="font-size: 16px;">➔</span></div>`;
+                list.appendChild(card);
+            });
+        }
+        
+        window.clearSearch = function() {
+            document.getElementById('searchInput').value = '';
+            renderCards();
+        }
+
+        function haptic() { if (navigator.vibrate) navigator.vibrate(50); }
+
+        const themeBtn = document.getElementById('themeToggleBtn');
+        const metaTheme = document.getElementById('metaThemeColor');
+        let currentTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        updateThemeUI(currentTheme);
+
+        themeBtn.onclick = () => {
+            haptic();
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            localStorage.setItem('theme', currentTheme);
+            updateThemeUI(currentTheme);
+        };
+
+        function updateThemeUI(theme) {
+            themeBtn.textContent = theme === 'light' ? '🌙' : '☀️';
+            metaTheme.content = theme === 'light' ? '#f4f5f7' : '#000000';
+        }
+
+        function openServiceModal(s) {
+            document.getElementById('modalTitle').textContent = s.title;
+            document.getElementById('modalExp').textContent = s.exp;
+            
+            const goodSec = document.getElementById('goodSection');
+            const badSec = document.getElementById('badSection');
+            if (s.good) { goodSec.style.display = 'block'; document.getElementById('modalGood').textContent = s.good; } else goodSec.style.display = 'none';
+            if (s.bad) { badSec.style.display = 'block'; document.getElementById('modalBad').textContent = s.bad; } else badSec.style.display = 'none';
+
+            const encodedMsg = encodeURIComponent(`Здравствуйте, ${db.name.split(' ')[1] || 'Имя'}! Пишу вам по поводу услуги: ${s.title}`);
+            document.getElementById('modalWaBtn').href = `https://wa.me/${db.phone}?text=${encodedMsg}`;
+            document.getElementById('modalTgBtn').href = `https://t.me/${db.tg}?text=${encodedMsg}`;
+            document.getElementById('modalVkBtn').href = `https://vk.com/im?sel=${db.vk}`;
+            document.getElementById('modalShareBtn').onclick = () => { haptic(); shareService(s); };
+
+            showModal('serviceModalOverlay', 'serviceModal');
+        }
+
+        document.getElementById('qrBtn').onclick = () => {
+            haptic();
+            const cleanUrl = window.location.origin + window.location.pathname;
+            document.getElementById('qrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(cleanUrl)}`;
+            showModal('qrModalOverlay', 'qrModal');
+        };
+
+        document.getElementById('vcardBtn').onclick = () => { haptic(); showModal('vcardModalOverlay', 'vcardModal'); };
+
+        window.downloadVCard = function() {
+            haptic();
+            const [surname, name] = db.name.split(" ");
+            const vcard = `BEGIN:VCARD\nVERSION:3.0\nN:${surname || 'Имя'};${name || ''};;\;\nFN:${db.name}\nTEL;TYPE=CELL:+${db.phone}\nURL:https://t.me/${db.tg}\nEND:VCARD`;
+            const blob = new Blob([vcard], { type: "text/vcard" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = "Contact.vcf"; a.click();
+            URL.revokeObjectURL(url);
+            closeModal('vcardModalOverlay', 'vcardModal');
+        };
+
+        function showModal(overlayId, modalId) {
+            const overlay = document.getElementById(overlayId);
+            overlay.classList.add('active');
+            document.body.classList.add('modal-open');
+            document.getElementById(modalId).scrollTop = 0;
+            document.getElementById(modalId).style.transform = '';
+            window.history.pushState({ modalId: overlayId }, "");
+        }
+
+        window.closeModal = function(overlayId, modalId) {
+            document.getElementById(overlayId).classList.remove('active');
+            if (!document.querySelectorAll('.modal-overlay.active').length) document.body.classList.remove('modal-open');
+            if (modalId === 'serviceModal') window.history.replaceState({}, document.title, window.location.origin + window.location.pathname);
+            setTimeout(() => { document.getElementById(modalId).style.transform = ''; }, 300);
+        }
+
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.onclick = (e) => {
+                if(e.target === overlay) {
+                    closeModal(overlay.id, overlay.querySelector('.modal').id);
+                    if(window.history.state !== null) window.history.back();
+                }
+            };
+        });
+
+        window.addEventListener('popstate', () => {
+            document.querySelectorAll('.modal-overlay.active').forEach(overlay => closeModal(overlay.id, overlay.querySelector('.modal').id));
+        });
+
+        document.querySelectorAll('.modal').forEach(modalEl => {
+            let touchStartY = 0;
+            modalEl.addEventListener('touchstart', e => { touchStartY = modalEl.scrollTop <= 0 ? e.touches[0].clientY : 0; }, {passive: true});
+            modalEl.addEventListener('touchmove', e => {
+                if (!touchStartY) return;
+                const deltaY = e.touches[0].clientY - touchStartY;
+                if (deltaY > 0) modalEl.style.transform = `translateY(${deltaY}px)`;
+            }, {passive: true});
+            modalEl.addEventListener('touchend', e => {
+                if (!touchStartY) return;
+                if (e.changedTouches[0].clientY - touchStartY > 100) {
+                    closeModal(modalEl.parentElement.id, modalEl.id);
+                    if(window.history.state !== null) window.history.back();
+                } else modalEl.style.transform = '';
+            });
+        });
+
+        function shareProfile() {
+            const url = window.location.origin + window.location.pathname;
+            if (navigator.share) navigator.share({ title: db.name, text: 'Электронная визитка', url: url });
+            else navigator.clipboard.writeText(url).then(() => alert('Ссылка скопирована!'));
+        }
+
+        function shareService(s) {
+            const serviceUrl = `${window.location.origin + window.location.pathname}?service=${s.id}`;
+            if (navigator.share) navigator.share({ title: `${db.name} - ${s.title}`, url: serviceUrl });
+            else navigator.clipboard.writeText(serviceUrl).then(() => alert('Ссылка на услугу скопирована!'));
+        }
+
+        const searchEl = document.getElementById('searchInput');
+        searchEl.addEventListener('focus', () => {
+            document.body.classList.add('search-focused');
+            window.scrollTo({ top: document.getElementById('header').offsetHeight, behavior: 'smooth' });
+        });
+        searchEl.addEventListener('blur', () => setTimeout(() => document.body.classList.remove('search-focused'), 150));
+        searchEl.addEventListener('input', (e) => renderCards(e.target.value));
+    </script>
+</body>
+</html>
 
