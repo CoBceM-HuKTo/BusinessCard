@@ -1,1 +1,214 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CMS Визиток (Автоматическая)</title>
+    <style>
+        :root { --bg: #f4f5f7; --text: #1d1d1f; --accent: #007aff; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background: var(--bg); color: var(--text); -webkit-tap-highlight-color: transparent; }
+        
+        .panel { max-width: 400px; margin: 50px auto; background: #fff; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .panel h2 { margin-bottom: 20px; text-align: center; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 13px; color: #888; margin-bottom: 5px; }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; outline: none; }
+        .btn { width: 100%; padding: 14px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
+        .btn.secondary { background: #e5e5ea; color: #333; }
+        .btn.success { background: #34c759; }
+
+        #globalLoader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 9999; display: none; align-items: center; justify-content: center; flex-direction: column; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        #editorView { display: none; padding-top: 60px; max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+        .admin-topbar { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #fff; padding: 10px; display: flex; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000; overflow-x: auto; }
+        .admin-btn { padding: 8px 12px; background: #f4f5f7; border: none; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; color: #333; margin-right: 5px; }
+        .admin-btn.success { background: #34c759; color: #fff; }
+        [contenteditable="true"] { outline: 2px dashed #007aff !important; background: rgba(0,122,255,0.05); border-radius: 5px; padding: 2px; }
+        
+        .header { padding: 20px; text-align: center; }
+        .avatar { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 4px solid var(--accent); cursor: pointer; }
+        .name { font-size: 24px; font-weight: 700; margin-bottom: 5px; }
+        .services { padding: 20px; display: grid; gap: 15px; }
+        .card { background: #fff; padding: 20px; border-radius: 20px; border: 1px solid #eee; border-left: 5px solid var(--accent); }
+    </style>
+</head>
+<body>
+
+    <div id="globalLoader"><div class="spinner"></div><h3 id="loaderText">Загрузка...</h3></div>
+
+    <!-- Авторизация -->
+    <div id="authView" class="panel">
+        <h2>Вход в систему</h2>
+        <div class="input-group">
+            <label>Репозиторий</label>
+            <input type="text" id="repoInp" value="CoBceM-HuKTo/BusinessCard">
+        </div>
+        <div class="input-group">
+            <label>Токен GitHub</label>
+            <input type="password" id="tokenInp" placeholder="ghp_...">
+        </div>
+        <button class="btn" onclick="saveAuth()">Войти</button>
+    </div>
+
+    <!-- Меню -->
+    <div id="menuView" class="panel" style="display: none;">
+        <h2>Меню</h2>
+        <div style="background: #f9f9f9; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+            <h3>Редактировать визитку</h3>
+            <input type="text" id="editIdInp" placeholder="ID (например: 000001)" style="width:100%; padding:10px; margin:10px 0; border:1px solid #ccc; border-radius:8px;">
+            <button class="btn" onclick="loadClient()">Открыть</button>
+        </div>
+        <div style="background: #e8f4fd; padding: 15px; border-radius: 10px;">
+            <h3 style="color: var(--accent);">Создать новую</h3>
+            <input type="text" id="newLinkInp" placeholder="Название папки (например: ivan)" style="width:100%; padding:10px; margin:10px 0 5px; border:1px solid #ccc; border-radius:8px;">
+            <input type="text" id="newIdInp" placeholder="ID (например: 000002)" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px;">
+            <button class="btn success" onclick="createNewClient()">Создать</button>
+        </div>
+        <button class="btn secondary" style="margin-top:10px;" onclick="logout()">Выйти</button>
+    </div>
+
+    <!-- Редактор -->
+    <div id="editorView">
+        <div class="admin-topbar">
+            <button class="admin-btn secondary" onclick="location.reload()">⬅ В меню</button>
+            <button class="admin-btn" onclick="addService()">+ Услуга</button>
+            <button class="admin-btn success" onclick="saveToGitHub()">💾 В GitHub</button>
+        </div>
+        <header class="header">
+            <p id="greetingText" class="editable-text" data-key="greeting" style="color:#888;">Загрузка...</p>
+            <img id="avatarImg" src="" class="avatar" onclick="editPhoto()">
+            <h1 id="nameText" class="name editable-text" data-key="name">Загрузка...</h1>
+            <p style="font-size:12px; color:#888;">Зажмите текст, чтобы изменить</p>
+        </header>
+        <div class="services" id="servicesList"></div>
+    </div>
+
+    <script>
+        function utf8_to_b64(str) { return window.btoa(unescape(encodeURIComponent(str))); }
+        function b64_to_utf8(str) { return decodeURIComponent(escape(window.atob(str))); }
+
+        let ghRepo = localStorage.getItem('ghRepo') || 'CoBceM-HuKTo/BusinessCard';
+        let ghToken = localStorage.getItem('ghToken') || '';
+        let currentEditingId = null;
+        let fileSha = null;
+        let appData = {};
+
+        const defaultData = {
+            name: "Новый Клиент", greeting: "Добрый день", avatar: "https://placehold.co/400x400/eeeeee/999999?text=Photo", phone: "79000000000", tg: "username", vk: "id000",
+            categories: ["Бизнес", "Строительство", "Здоровье"],
+            services: [{ id: 1, title: 'Услуга', category: 'Бизнес', exp: 'Опыт', good: 'Плюсы', bad: 'Минусы' }]
+        };
+
+        if (ghToken) { document.getElementById('repoInp').value = ghRepo; document.getElementById('tokenInp').value = ghToken; }
+
+        function showView(id) { document.querySelectorAll('.panel, #editorView').forEach(e => e.style.display = 'none'); document.getElementById(id).style.display = 'block'; }
+        function showLoader(txt) { document.getElementById('loaderText').textContent = txt; document.getElementById('globalLoader').style.display = 'flex'; }
+        function hideLoader() { document.getElementById('globalLoader').style.display = 'none'; }
+
+        function saveAuth() {
+            ghRepo = document.getElementById('repoInp').value.trim();
+            ghToken = document.getElementById('tokenInp').value.trim();
+            if(!ghToken) return alert("Введите токен!");
+            localStorage.setItem('ghRepo', ghRepo); localStorage.setItem('ghToken', ghToken);
+            showView('menuView');
+        }
+        function logout() { localStorage.clear(); location.reload(); }
+
+        async function githubReq(method, path, body = null) {
+            const opts = { method, headers: { 'Authorization': `token ${ghToken}`, 'Accept': 'application/vnd.github.v3+json' } };
+            if(body) opts.body = JSON.stringify(body);
+            const res = await fetch(`https://api.github.com/repos/${ghRepo}/contents/${path}`, opts);
+            if(!res.ok) throw new Error(res.status);
+            return await res.json();
+        }
+
+        async function createNewClient() {
+            const link = document.getElementById('newLinkInp').value.trim();
+            const cid = document.getElementById('newIdInp').value.trim();
+            if(!link || !cid) return alert("Заполните оба поля");
+            showLoader("Создаем папки...");
+            try {
+                const tmpl = await githubReq('GET', 'template.html');
+                const html = b64_to_utf8(tmpl.content).replace('{{CLIENT_ID}}', cid);
+                await githubReq('PUT', `${link}/index.html`, { message: `Новый клиент ${link}`, content: utf8_to_b64(html) });
+                await githubReq('PUT', `${cid}/data.json`, { message: `База ${cid}`, content: utf8_to_b64(JSON.stringify(defaultData, null, 2)) });
+                hideLoader(); alert(`Создано! Ссылка: /${link}`);
+            } catch(e) { hideLoader(); alert("Ошибка. Проверьте токен и наличие template.html"); }
+        }
+
+        async function loadClient() {
+            currentEditingId = document.getElementById('editIdInp').value.trim();
+            if(!currentEditingId) return;
+            showLoader("Загрузка...");
+            try {
+                const res = await githubReq('GET', `${currentEditingId}/data.json`);
+                fileSha = res.sha;
+                appData = JSON.parse(b64_to_utf8(res.content));
+                hideLoader(); initEditor(); showView('editorView');
+            } catch(e) { hideLoader(); alert("Не найдена папка " + currentEditingId); }
+        }
+
+        async function saveToGitHub() {
+            showLoader("Сохранение...");
+            try {
+                const res = await githubReq('PUT', `${currentEditingId}/data.json`, {
+                    message: "Обновление через админку", content: utf8_to_b64(JSON.stringify(appData, null, 2)), sha: fileSha
+                });
+                fileSha = res.content.sha;
+                hideLoader(); alert("Сохранено!");
+            } catch(e) { hideLoader(); alert("Ошибка сохранения."); }
+        }
+
+        // --- РЕДАКТОР ---
+        function initEditor() {
+            document.getElementById('nameText').textContent = appData.name;
+            document.getElementById('greetingText').textContent = appData.greeting;
+            document.getElementById('avatarImg').src = appData.avatar;
+            renderServices();
+        }
+
+        function renderServices() {
+            const list = document.getElementById('servicesList'); list.innerHTML = '';
+            appData.services.forEach(s => {
+                const c = document.createElement('div'); c.className = 'card';
+                c.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <span style="font-size:12px; color:#888;">Кат: <b class="editable-text" data-sid="${s.id}" data-field="category">${s.category}</b></span>
+                        <button onclick="deleteService(${s.id})" style="border:none;background:none;color:red;">❌</button>
+                    </div>
+                    <div class="card-title editable-text" data-sid="${s.id}" data-field="title">${s.title}</div>
+                    <div style="background:#f4f5f7; padding:10px; border-radius:10px; margin-bottom:10px;">
+                        <div style="font-size:12px; color:#007aff;">Опыт:</div><div class="editable-text" data-sid="${s.id}" data-field="exp">${s.exp}</div>
+                    </div>
+                    <div style="background:#f4f5f7; padding:10px; border-radius:10px;">
+                        <div style="font-size:12px; color:#34c759;">Плюсы:</div><div class="editable-text" data-sid="${s.id}" data-field="good">${s.good}</div>
+                    </div>
+                `;
+                list.appendChild(c);
+            });
+            setupLongPressEditors();
+        }
+
+        function setupLongPressEditors() {
+            document.querySelectorAll('.editable-text').forEach(el => {
+                let timer;
+                const start = () => { timer = setTimeout(() => { el.contentEditable=true; el.focus(); }, 500); };
+                const cancel = () => clearTimeout(timer);
+                el.onmousedown = start; el.ontouchstart = start; el.onmouseup = cancel; el.onmouseleave = cancel; el.ontouchend = cancel;
+                el.onblur = () => {
+                    el.contentEditable = false; const txt = el.textContent.trim();
+                    if(el.dataset.key) appData[el.dataset.key] = txt;
+                    else if(el.dataset.sid) appData.services.find(s => s.id == el.dataset.sid)[el.dataset.field] = txt;
+                };
+            });
+        }
+        function addService() { appData.services.push({ id: Date.now(), title: 'Новая', category: 'Бизнес', exp: '-', good: '-', bad: '-' }); renderServices(); }
+        function deleteService(id) { if(confirm("Удалить?")){ appData.services = appData.services.filter(s => s.id != id); renderServices(); } }
+        function editPhoto() { const url = prompt("Ссылка на фото:", appData.avatar); if(url){ appData.avatar = url; document.getElementById('avatarImg').src = url; } }
+    </script>
+</body>
+</html>
 
