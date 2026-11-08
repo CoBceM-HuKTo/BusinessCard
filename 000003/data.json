@@ -1,0 +1,22 @@
+{
+  "name": "Веб-визитки под ключ",
+  "greeting": "Добрый день",
+  "avatar": "https://placehold.co/400x400/eeeeee/999999?text=Фото",
+  "phone": "79000000000",
+  "tg": "username",
+  "vk": "id0",
+  "blocked": false,
+  "categories": [
+    "Бизнес"
+  ],
+  "services": [
+    {
+      "id": 1,
+      "title": "Услуга",
+      "category": "Бизнес",
+      "exp": "-",
+      "good": "-",
+      "bad": "-"
+    }
+  ]
+}
