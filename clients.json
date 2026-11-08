@@ -10,5 +10,11 @@
     "alias": "GabulaPA",
     "name": "Габула Павел Алексеевич",
     "blocked": false
+  },
+  {
+    "id": "000003",
+    "alias": "Visits",
+    "name": "Веб-визитки под ключ",
+    "blocked": false
   }
 ]
