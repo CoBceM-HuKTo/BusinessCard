@@ -4,5 +4,11 @@
     "alias": "GabulaAA",
     "name": "Габула Алексей Алексеевич",
     "blocked": false
+  },
+  {
+    "id": "000002",
+    "alias": "GabulaPA",
+    "name": "Габула Павел Алексеевич",
+    "blocked": false
   }
 ]
