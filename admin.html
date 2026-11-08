@@ -8,7 +8,6 @@
         :root { --bg: #f4f5f7; --text: #1d1d1f; --accent: #007aff; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
         body { background: var(--bg); color: var(--text); -webkit-tap-highlight-color: transparent; }
-        
         .panel { max-width: 450px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .panel h2 { margin-bottom: 20px; text-align: center; }
         .input-group { margin-bottom: 15px; }
@@ -17,25 +16,23 @@
         .btn { width: 100%; padding: 14px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
         .btn.secondary { background: #e5e5ea; color: #333; }
         .btn.success { background: #34c759; }
-
+        .btn.dark { background: #1d1d1f; }
+        .split-auth { display: flex; gap: 10px; margin-bottom: 20px; }
+        .auth-tab { flex: 1; padding: 10px; text-align: center; background: #f4f5f7; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px; color: #888; }
+        .auth-tab.active { background: #007aff; color: #fff; }
         #globalLoader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 9999; display: none; align-items: center; justify-content: center; flex-direction: column; }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        /* ПАНЕЛЬ СОЗДАТЕЛЯ (DASHBOARD) */
         #dashboardView { display: none; padding: 20px; max-width: 600px; margin: 0 auto; padding-bottom: 100px; }
         .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .client-card { background: #fff; padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border: 1px solid #eee; cursor: pointer; transition: 0.2s;}
-        .client-card:active { transform: scale(0.98); }
+        .client-card { background: #fff; padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border: 1px solid #eee; cursor: pointer;}
         .client-info h4 { font-size: 16px; margin-bottom: 5px; }
         .client-info p { font-size: 12px; color: #888; }
         .status-badge { font-size: 10px; padding: 4px 8px; border-radius: 10px; font-weight: bold; }
         .status-badge.active { background: #e8f5e9; color: #2e7d32; }
         .status-badge.blocked { background: #ffebee; color: #c62828; }
         .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--accent); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 10px 20px rgba(0,122,255,0.3); border: none; cursor: pointer; z-index: 100;}
-
-        /* РЕДАКТОР ВИЗИТКИ */
-        #editorView { display: none; padding-top: 60px; padding-bottom: 100px; max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+        #editorView { display: none; padding-top: 60px; padding-bottom: 100px; max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; }
         .admin-topbar { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #fff; padding: 10px; display: flex; gap: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000; overflow-x: auto; }
         .admin-btn { padding: 8px 12px; background: #f4f5f7; border: none; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; color: #333; white-space: nowrap;}
         .admin-btn.success { background: #34c759; color: #fff; }
@@ -45,72 +42,95 @@
         .name { font-size: 24px; font-weight: 700; margin-bottom: 5px; }
         .services { padding: 20px; display: grid; gap: 15px; }
         .card { background: #fff; padding: 20px; border-radius: 20px; border: 1px solid #eee; border-left: 5px solid var(--accent); }
-
-        /* Модальные окна */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; justify-content: center; z-index: 999; }
         .modal-overlay.active { display: flex; }
         .modal { background: #fff; width: 100%; max-width: 480px; border-radius: 30px 30px 0 0; padding: 25px 20px 30px; max-height: 90vh; overflow-y: auto; }
         .modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
         .modal-header h2 { font-size: 22px; margin: 0; }
         .modal-section { margin-bottom: 15px; background: var(--bg); padding: 15px; border-radius: 15px; }
+        #codeEditorView { display: none; padding: 20px; max-width: 800px; margin: 0 auto; height: 100vh; flex-direction: column; }
+        #codeArea { flex: 1; width: 100%; padding: 15px; font-family: monospace; font-size: 13px; border: 1px solid #ddd; border-radius: 10px; resize: none; margin-bottom: 15px; background: #2b2b2b; color: #f8f8f2; }
     </style>
 </head>
 <body>
 
     <div id="globalLoader"><div class="spinner"></div><h3 id="loaderText">Загрузка...</h3></div>
 
-    <!-- ВХОД -->
     <div id="authView" class="panel">
-        <h2>Вход в систему</h2>
-        <div class="input-group">
-            <label>ID или Логин Создателя</label>
-            <input type="text" id="loginInp" placeholder="Например: 000000">
+        <div class="split-auth">
+            <div class="auth-tab active" id="tabClient" onclick="switchAuth('client')">🙋‍♂️ Клиент</div>
+            <div class="auth-tab" id="tabAdmin" onclick="switchAuth('admin')">⚙️ Создатель</div>
         </div>
-        <div class="input-group">
-            <label>Пароль (или GitHub Токен)</label>
-            <input type="password" id="passInp" placeholder="Пароль">
+
+        <div id="formClient">
+            <div class="input-group">
+                <label>Ваш ID (Логин)</label>
+                <input type="text" id="clientLoginInp" placeholder="Например: 000001">
+            </div>
+            <div class="input-group">
+                <label>Пароль</label>
+                <input type="password" id="clientPassInp" placeholder="Пароль">
+            </div>
+            <button class="btn" onclick="loginAsClient()">Войти в редактор</button>
         </div>
-        <div class="input-group" id="repoGroup" style="display:none;">
-            <label>Репозиторий (только для 000000)</label>
-            <input type="text" id="repoInp" value="CoBceM-HuKTo/BusinessCard">
+
+        <div id="formAdmin" style="display: none;">
+            <div class="input-group">
+                <label>Репозиторий</label>
+                <input type="text" id="repoInp" value="CoBceM-HuKTo/BusinessCard">
+            </div>
+            <div class="input-group">
+                <label>GitHub Token</label>
+                <input type="password" id="tokenInp" placeholder="ghp_...">
+            </div>
+            <button class="btn dark" onclick="loginAsAdmin()">Управление системой</button>
         </div>
-        <button class="btn" onclick="login()">Войти</button>
     </div>
 
-    <!-- ПАНЕЛЬ СОЗДАТЕЛЯ (DASHBOARD) -->
+    <div id="menuView" class="panel" style="display: none;">
+        <h2>Панель Создателя</h2>
+        <button class="btn dark" onclick="openTemplateEditor()" style="margin-bottom: 25px;">🛠 Редактировать template.html</button>
+        <button class="btn" onclick="showView('dashboardView')" style="margin-bottom: 25px;">👥 База клиентов</button>
+        <button class="btn secondary" style="margin-top:10px;" onclick="location.reload()">Выйти</button>
+    </div>
+
     <div id="dashboardView">
         <div class="dash-header">
             <h2>Клиенты</h2>
-            <button class="btn secondary" style="width: auto; padding: 8px 15px; margin:0;" onclick="location.reload()">Выход</button>
+            <button class="btn secondary" style="width: auto; padding: 8px 15px; margin:0;" onclick="showView('menuView')">Назад</button>
         </div>
         <input type="text" id="searchClientInp" placeholder="🔍 Поиск по имени или ID..." style="width:100%; padding:12px; border-radius:10px; border:1px solid #ddd; margin-bottom:20px; outline:none;" oninput="renderClientList()">
-        
         <div id="clientsListContainer"></div>
         <button class="fab" onclick="showNewClientModal()">+</button>
     </div>
 
-    <!-- РЕДАКТОР ВИЗИТКИ -->
     <div id="editorView">
         <div class="admin-topbar">
             <button class="admin-btn secondary" id="backToDashBtn" onclick="showView('dashboardView')">⬅ Назад</button>
             <button class="admin-btn" onclick="addService()">+ Услуга</button>
-            <!-- Скрытый инпут для выбора фото с телефона -->
             <input type="file" id="photoUploader" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
             <button class="admin-btn" onclick="document.getElementById('photoUploader').click()">🖼 Фото</button>
             <button class="admin-btn" onclick="editContacts()">🔗 Контакты</button>
             <button class="admin-btn success" id="saveBtn" onclick="saveData()">💾 Сохранить</button>
         </div>
-
         <header class="header">
             <p id="greetingText" class="editable-text" data-key="greeting" style="color:#888; font-weight:600; text-transform:uppercase;"></p>
             <img id="avatarImg" src="" class="avatar" onclick="document.getElementById('photoUploader').click()">
             <h1 id="nameText" class="name editable-text" data-key="name"></h1>
-            <p style="font-size:12px; color:#888;">Зажмите текст для изменения.</p>
         </header>
         <div class="services" id="servicesList"></div>
     </div>
 
-    <!-- Модалка управления услугой -->
+    <div id="codeEditorView">
+        <h2 style="color:#333; margin-bottom:10px;">Редактор template.html</h2>
+        <textarea id="codeArea"></textarea>
+        <div style="display:flex; gap:10px;">
+            <button class="btn secondary" onclick="showView('menuView')">Отмена</button>
+            <button class="btn success" onclick="saveTemplateToGitHub()">💾 Сохранить в GitHub</button>
+        </div>
+    </div>
+
+    <!-- Модалка услуги -->
     <div class="modal-overlay" id="serviceModalOverlay">
         <div class="modal" id="serviceModal">
             <div class="modal-header">
@@ -124,7 +144,7 @@
         </div>
     </div>
 
-    <!-- Модалка создания клиента -->
+    <!-- Новые клиенты -->
     <div class="modal-overlay" id="newClientModal">
         <div class="modal" style="border-radius:20px; padding:20px; margin:20px; max-width:400px; transform:translateY(0);">
             <h2 style="margin-bottom:15px;">Новый клиент</h2>
@@ -143,72 +163,69 @@
         </div>
     </div>
 
-    <!-- Модалка долгого нажатия на клиента -->
+    <!-- Управление клиентом -->
     <div class="modal-overlay" id="clientActionModal">
         <div class="modal" style="border-radius:20px; padding:20px; margin:20px; max-width:400px; transform:translateY(0); text-align:center;">
             <h2 id="actionClientName" style="margin-bottom:20px;">Клиент</h2>
-            <button class="btn" style="background:#ffcc00; color:#333;" id="toggleBlockBtn" onclick="toggleBlockClient()">Блокировать / Разблокировать</button>
+            <button class="btn" style="background:#ffcc00; color:#333;" id="toggleBlockBtn" onclick="toggleBlockClient()">Блокировать</button>
             <button class="btn" style="background:#ff3b30;" onclick="deleteClientProcess()">Удалить навсегда</button>
             <button class="btn secondary" onclick="closeModal('clientActionModal')">Отмена</button>
         </div>
     </div>
 
     <script>
-        // Утилиты
         function utf8_to_b64(str) { return window.btoa(unescape(encodeURIComponent(str))); }
         function b64_to_utf8(str) { return decodeURIComponent(escape(window.atob(str))); }
-        function showView(id) { document.getElementById('authView').style.display='none'; document.getElementById('dashboardView').style.display='none'; document.getElementById('editorView').style.display='none'; document.getElementById(id).style.display='block'; }
+        function showView(id) { document.querySelectorAll('#authView, #menuView, #dashboardView, #editorView, #codeEditorView').forEach(e => e.style.display='none'); document.getElementById(id).style.display = id==='codeEditorView'?'flex':'block'; }
         function showLoader(txt) { document.getElementById('loaderText').textContent = txt; document.getElementById('globalLoader').style.display = 'flex'; }
         function hideLoader() { document.getElementById('globalLoader').style.display = 'none'; }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-        // Показывать поле репозитория только если вводят 000000
-        document.getElementById('loginInp').addEventListener('input', (e) => {
-            document.getElementById('repoGroup').style.display = e.target.value === '000000' ? 'block' : 'none';
-        });
-
-        let activeMode = 'client'; // admin, client
+        let activeMode = 'client'; 
         let currentId = null;
         let ghRepo = localStorage.getItem('ghRepo') || 'CoBceM-HuKTo/BusinessCard';
         let ghToken = localStorage.getItem('ghToken') || '';
-        let fileSha = null; 
-        let appData = {};
-        
-        let clientsRegistry = [];
-        let registrySha = null;
-        let actionClientId = null;
+        let fileSha = null; let templateSha = null; let appData = {};
+        let clientsRegistry = []; let registrySha = null; let actionClientId = null;
 
-        // Если токен есть в памяти, подставляем
-        if(ghToken) document.getElementById('passInp').value = ghToken;
+        const defaultData = { name: "Новый Клиент", greeting: "Добрый день", avatar: "https://placehold.co/400x400/eeeeee/999999?text=Фото", phone: "79000000000", tg: "username", vk: "id0", categories: ["Бизнес"], services: [] };
 
-        // --- ЛОГИКА АВТОРИЗАЦИИ ---
-        function login() {
-            const loginVal = document.getElementById('loginInp').value.trim();
-            const passVal = document.getElementById('passInp').value.trim();
-            
-            if (loginVal === '000000' && passVal.length > 10) {
-                // СУПЕР-АДМИН (Требуется Токен)
-                activeMode = 'admin';
-                ghRepo = document.getElementById('repoInp').value.trim();
-                ghToken = passVal;
-                localStorage.setItem('ghRepo', ghRepo);
-                localStorage.setItem('ghToken', ghToken);
-                document.getElementById('saveBtn').textContent = "💾 Сохранить в GitHub";
-                document.getElementById('backToDashBtn').style.display = 'block';
-                loadRegistry();
-            } else if (loginVal === passVal && loginVal.length > 0 && loginVal !== '000000') {
-                // ОБЫЧНЫЙ КЛИЕНТ
-                activeMode = 'client';
-                currentId = loginVal;
-                document.getElementById('saveBtn').textContent = "⬇ Скачать data.json";
-                document.getElementById('backToDashBtn').style.display = 'none'; // Клиенту некуда возвращаться
-                loadClientData(currentId, true);
-            } else {
-                alert("Неверные данные! Если вы создатель, логин 000000, пароль - токен GitHub. Если клиент - логин и пароль это ваш ID.");
-            }
+        if(ghToken) document.getElementById('tokenInp').value = ghToken;
+
+        function switchAuth(mode) {
+            document.getElementById('tabClient').classList.remove('active'); document.getElementById('tabAdmin').classList.remove('active');
+            if(mode === 'client') { document.getElementById('tabClient').classList.add('active'); document.getElementById('formClient').style.display = 'block'; document.getElementById('formAdmin').style.display = 'none'; }
+            else { document.getElementById('tabAdmin').classList.add('active'); document.getElementById('formClient').style.display = 'none'; document.getElementById('formAdmin').style.display = 'block'; }
         }
 
-        // --- API GITHUB ---
+        // ВХОД КЛИЕНТА
+        function loginAsClient() {
+            const login = document.getElementById('clientLoginInp').value.trim();
+            const pass = document.getElementById('clientPassInp').value.trim();
+            if(!login || login !== pass) return alert("Неверный логин или пароль");
+            
+            currentId = login; activeMode = 'client';
+            document.getElementById('saveBtn').textContent = "⬇ Скачать data.json";
+            document.getElementById('backToDashBtn').style.display = 'none'; 
+            
+            showLoader("Загрузка визитки...");
+            // ИСПРАВЛЕН БАГ С ПУТЯМИ! Больше нет '../'
+            fetch(`${currentId}/data.json?v=` + Date.now())
+                .then(res => { if(!res.ok) throw new Error(); return res.json(); })
+                .then(data => { appData = data; hideLoader(); initEditor(); showView('editorView'); })
+                .catch(err => { hideLoader(); alert(`Клиент ${currentId} не найден.`); });
+        }
+
+        // ВХОД АДМИНА
+        function loginAsAdmin() {
+            ghRepo = document.getElementById('repoInp').value.trim();
+            ghToken = document.getElementById('tokenInp').value.trim();
+            if(!ghToken) return alert("Введите токен!");
+            localStorage.setItem('ghRepo', ghRepo); localStorage.setItem('ghToken', ghToken);
+            activeMode = 'admin'; document.getElementById('saveBtn').textContent = "💾 В GitHub"; document.getElementById('backToDashBtn').style.display = 'block';
+            showView('menuView'); loadRegistry();
+        }
+
         async function githubReq(method, path, body = null) {
             const opts = { method, headers: { 'Authorization': `token ${ghToken}`, 'Accept': 'application/vnd.github.v3+json' } };
             if(body) opts.body = JSON.stringify(body);
@@ -217,26 +234,16 @@
             return await res.json();
         }
 
-        // --- ЛОГИКА РЕЕСТРА КЛИЕНТОВ (Для Админа) ---
         async function loadRegistry() {
-            showLoader("Загрузка базы клиентов...");
             try {
                 const res = await githubReq('GET', 'clients.json');
-                registrySha = res.sha;
-                clientsRegistry = JSON.parse(b64_to_utf8(res.content));
-            } catch(e) {
-                // Если файла нет (первый запуск), создаем его
-                clientsRegistry = [];
-                await saveRegistry();
-            }
-            hideLoader();
+                registrySha = res.sha; clientsRegistry = JSON.parse(b64_to_utf8(res.content));
+            } catch(e) { clientsRegistry = []; await saveRegistry(); }
             renderClientList();
-            showView('dashboardView');
         }
 
         async function saveRegistry() {
-            const content = utf8_to_b64(JSON.stringify(clientsRegistry, null, 2));
-            const body = { message: "Обновление реестра клиентов", content };
+            const body = { message: "Обновление реестра", content: utf8_to_b64(JSON.stringify(clientsRegistry, null, 2)) };
             if(registrySha) body.sha = registrySha;
             const res = await githubReq('PUT', 'clients.json', body);
             registrySha = res.content.sha;
@@ -244,147 +251,107 @@
 
         function renderClientList() {
             const query = document.getElementById('searchClientInp').value.toLowerCase();
-            const container = document.getElementById('clientsListContainer');
-            container.innerHTML = '';
-            
+            const container = document.getElementById('clientsListContainer'); container.innerHTML = '';
             const filtered = clientsRegistry.filter(c => c.name.toLowerCase().includes(query) || c.id.includes(query));
             if(filtered.length === 0) container.innerHTML = '<p style="text-align:center; color:#888;">Клиентов нет</p>';
 
             filtered.forEach(c => {
-                const div = document.createElement('div');
-                div.className = 'client-card';
-                div.innerHTML = `
-                    <div class="client-info">
-                        <h4>${c.name}</h4>
-                        <p>ID: ${c.id} | Ссылка: /${c.alias}</p>
-                    </div>
-                    <div class="status-badge ${c.blocked ? 'blocked' : 'active'}">${c.blocked ? 'Заблокирован' : 'Активен'}</div>
-                `;
+                const div = document.createElement('div'); div.className = 'client-card';
+                div.innerHTML = `<div class="client-info"><h4>${c.name}</h4><p>ID: ${c.id} | /${c.alias}</p></div><div class="status-badge ${c.blocked ? 'blocked' : 'active'}">${c.blocked ? 'Блок' : 'Активен'}</div>`;
                 
-                // Обработчики нажатий
                 let timer;
                 div.onmousedown = () => { timer = setTimeout(() => { openClientActionModal(c); }, 600); };
                 div.ontouchstart = () => { timer = setTimeout(() => { openClientActionModal(c); }, 600); };
                 const cancel = () => clearTimeout(timer);
                 div.onmouseup = cancel; div.onmouseleave = cancel; div.ontouchend = cancel; div.ontouchmove = cancel;
-                
-                // Короткий клик = Открыть редактор
-                div.onclick = () => { if(timer) clearTimeout(timer); loadClientData(c.id, false); };
-                
+                div.onclick = () => { if(timer) clearTimeout(timer); loadClientData(c.id); };
                 container.appendChild(div);
             });
         }
 
-        // --- СОЗДАНИЕ КЛИЕНТА (С АВТО-ID) ---
-        function showNewClientModal() {
-            document.getElementById('newAliasInp').value = '';
-            document.getElementById('newNameInp').value = '';
-            document.getElementById('newClientModal').classList.add('active');
-        }
+        function showNewClientModal() { document.getElementById('newAliasInp').value = ''; document.getElementById('newNameInp').value = ''; document.getElementById('newClientModal').classList.add('active'); }
 
         async function createClientProcess() {
             const alias = document.getElementById('newAliasInp').value.trim();
             const name = document.getElementById('newNameInp').value.trim();
             if(!alias || !name) return alert("Заполните оба поля!");
-            
-            // Вычисляем новый ID
-            let maxId = 0;
-            clientsRegistry.forEach(c => { const num = parseInt(c.id); if(num > maxId) maxId = num; });
+            let maxId = 0; clientsRegistry.forEach(c => { const num = parseInt(c.id); if(num > maxId) maxId = num; });
             const newId = String(maxId + 1).padStart(6, '0');
 
-            closeModal('newClientModal');
-            showLoader(`Создание ${newId}...`);
-
+            closeModal('newClientModal'); showLoader(`Создание ${newId}...`);
             try {
-                // 1. Копируем template.html в папку alias
                 const tmpl = await githubReq('GET', 'template.html');
                 const html = b64_to_utf8(tmpl.content).replace('{{CLIENT_ID}}', newId);
                 await githubReq('PUT', `${alias}/index.html`, { message: `Визитка ${alias}`, content: utf8_to_b64(html) });
-                
-                // 2. Создаем базу data.json в папке ID
-                const newData = { name: name, greeting: "Добрый день", avatar: "https://placehold.co/400x400/eeeeee/999999?text=Фото", phone: "79000000000", tg: "username", vk: "id0", blocked: false, categories: ["Бизнес"], services: [{ id: 1, title: 'Услуга', category: 'Бизнес', exp: '-', good: '-', bad: '-' }] };
+                const newData = JSON.parse(JSON.stringify(defaultData)); newData.name = name;
                 await githubReq('PUT', `${newId}/data.json`, { message: `База ${newId}`, content: utf8_to_b64(JSON.stringify(newData, null, 2)) });
-                
-                // 3. Обновляем реестр
                 clientsRegistry.push({ id: newId, alias: alias, name: name, blocked: false });
-                await saveRegistry();
-
-                hideLoader();
-                renderClientList();
-            } catch(e) { hideLoader(); alert("Ошибка при создании."); console.error(e); }
+                await saveRegistry(); hideLoader(); renderClientList();
+            } catch(e) { hideLoader(); alert("Ошибка при создании. Убедитесь, что файл template.html существует."); }
         }
 
-        // --- УПРАВЛЕНИЕ КЛИЕНТОМ (Долгое нажатие) ---
         function openClientActionModal(c) {
             actionClientId = c.id;
             document.getElementById('actionClientName').textContent = c.name + ` (${c.id})`;
-            document.getElementById('toggleBlockBtn').textContent = c.blocked ? '🟢 Разблокировать' : '🔴 Заблокировать';
+            document.getElementById('toggleBlockBtn').textContent = c.blocked ? 'Разблокировать' : 'Заблокировать';
             document.getElementById('clientActionModal').classList.add('active');
         }
 
         async function toggleBlockClient() {
             const client = clientsRegistry.find(c => c.id === actionClientId);
-            client.blocked = !client.blocked;
-            closeModal('clientActionModal');
-            showLoader("Изменение статуса...");
+            client.blocked = !client.blocked; closeModal('clientActionModal'); showLoader("Изменение статуса...");
             try {
-                // Меняем в реестре
                 await saveRegistry();
-                // Меняем в data.json клиента
                 const res = await githubReq('GET', `${client.id}/data.json`);
-                const cData = JSON.parse(b64_to_utf8(res.content));
-                cData.blocked = client.blocked;
-                await githubReq('PUT', `${client.id}/data.json`, { message: "Смена статуса", content: utf8_to_b64(JSON.stringify(cData, null, 2)), sha: res.sha });
+                const cData = JSON.parse(b64_to_utf8(res.content)); cData.blocked = client.blocked;
+                await githubReq('PUT', `${client.id}/data.json`, { message: "Статус", content: utf8_to_b64(JSON.stringify(cData, null, 2)), sha: res.sha });
                 hideLoader(); renderClientList();
             } catch(e) { hideLoader(); alert("Ошибка!"); }
         }
 
         async function deleteClientProcess() {
-            if(!confirm("Удалить базу данных клиента навсегда? Это необратимо.")) return;
+            if(!confirm("Удалить базу данных навсегда?")) return;
             const client = clientsRegistry.find(c => c.id === actionClientId);
-            closeModal('clientActionModal');
-            showLoader("Удаление...");
+            closeModal('clientActionModal'); showLoader("Удаление...");
             try {
-                // Удаляем data.json
                 const res = await githubReq('GET', `${client.id}/data.json`);
-                await githubReq('DELETE', `${client.id}/data.json`, { message: "Удаление БД", sha: res.sha });
-                // Удаляем из реестра
+                await githubReq('DELETE', `${client.id}/data.json`, { message: "Удаление", sha: res.sha });
                 clientsRegistry = clientsRegistry.filter(c => c.id !== actionClientId);
-                await saveRegistry();
-                hideLoader(); renderClientList();
-            } catch(e) { hideLoader(); alert("Ошибка при удалении."); }
+                await saveRegistry(); hideLoader(); renderClientList();
+            } catch(e) { hideLoader(); alert("Ошибка удаления."); }
         }
 
-        // --- РЕДАКТОР ВИЗИТКИ (Общий) ---
-        async function loadClientData(id, isClientMode) {
-            currentId = id;
-            showLoader("Загрузка данных...");
+        async function loadClientData(id) {
+            currentId = id; showLoader("Загрузка данных...");
             try {
-                const res = await fetch(`../${currentId}/data.json?v=` + Date.now());
-                if(!res.ok) {
-                    if(activeMode === 'admin') {
-                        // Если админ, пробуем дернуть через API на случай кеширования
-                        const apiRes = await githubReq('GET', `${currentId}/data.json`);
-                        fileSha = apiRes.sha;
-                        appData = JSON.parse(b64_to_utf8(apiRes.content));
-                    } else { throw new Error(); }
-                } else {
-                    appData = await res.json();
-                    if(activeMode === 'admin') {
-                        const apiRes = await githubReq('GET', `${currentId}/data.json`);
-                        fileSha = apiRes.sha;
-                    }
-                }
+                const apiRes = await githubReq('GET', `${currentId}/data.json`);
+                fileSha = apiRes.sha; appData = JSON.parse(b64_to_utf8(apiRes.content));
                 hideLoader(); initEditor(); showView('editorView');
-            } catch(e) { hideLoader(); alert(`Клиент ${currentId} не найден.`); }
+            } catch(e) { hideLoader(); alert("Не найдена папка " + currentId); }
+        }
+
+        async function openTemplateEditor() {
+            showLoader("Код шаблона...");
+            try {
+                const res = await githubReq('GET', 'template.html');
+                templateSha = res.sha; document.getElementById('codeArea').value = b64_to_utf8(res.content);
+                hideLoader(); showView('codeEditorView');
+            } catch(e) { hideLoader(); alert("Файл template.html не найден."); }
+        }
+
+        async function saveTemplateToGitHub() {
+            showLoader("Сохраняем шаблон...");
+            try {
+                const res = await githubReq('PUT', 'template.html', { message: "Обновлен шаблон", content: utf8_to_b64(document.getElementById('codeArea').value), sha: templateSha });
+                templateSha = res.content.sha; hideLoader(); alert("Шаблон обновлен!");
+            } catch(e) { hideLoader(); alert("Ошибка сохранения шаблона."); }
         }
 
         function initEditor() {
             document.getElementById('nameText').textContent = appData.name;
             document.getElementById('greetingText').textContent = appData.greeting;
             document.getElementById('avatarImg').src = appData.avatar || 'https://placehold.co/400x400/eeeeee/999999?text=Фото';
-            renderServices();
-            setupLongPressEditors(document.getElementById('editorView'));
+            renderServices(); setupLongPressEditors(document.getElementById('editorView'));
         }
 
         function renderServices() {
@@ -393,35 +360,24 @@
                 const c = document.createElement('div'); c.className = 'card';
                 c.onclick = (e) => { if(!c.querySelector('[contenteditable="true"]')) openServiceModal(s); };
                 c.innerHTML = `
-                    <div style="font-size:12px; color:#888; margin-bottom:10px;">Категория: <b class="editable-text" data-sid="${s.id}" data-field="category">${s.category}</b></div>
+                    <div style="font-size:12px; color:#888; margin-bottom:10px;">Кат: <b class="editable-text" data-sid="${s.id}" data-field="category">${s.category}</b> <button onclick="event.stopPropagation(); deleteService(${s.id})" style="float:right; border:none; background:none; color:red;">❌</button></div>
                     <div style="font-size:18px; font-weight:bold;" class="editable-text" data-sid="${s.id}" data-field="title">${s.title}</div>
-                    <div style="font-size:13px; color:#007aff; margin-top:10px;">Нажмите для редактирования описания ➔</div>
                 `;
                 list.appendChild(c);
             });
             setupLongPressEditors(list);
         }
 
-        // ФОТО: Загрузка с телефона и сжатие
         function handlePhotoUpload(event) {
-            const file = event.target.files[0];
-            if(!file) return;
+            const file = event.target.files[0]; if(!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image();
                 img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const MAX_SIZE = 400; // Сжимаем до 400px
-                    let width = img.width; let height = img.height;
-                    if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
-                    else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
-                    canvas.width = width; canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
-                    
-                    appData.avatar = compressedBase64;
-                    document.getElementById('avatarImg').src = compressedBase64;
+                    const canvas = document.createElement('canvas'); const MAX_SIZE = 400; let width = img.width; let height = img.height;
+                    if(width > height) { if(width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if(height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+                    canvas.width = width; canvas.height = height; canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                    const b64 = canvas.toDataURL('image/jpeg', 0.8); appData.avatar = b64; document.getElementById('avatarImg').src = b64;
                 }
                 img.src = e.target.result;
             }
@@ -431,11 +387,9 @@
         function setupLongPressEditors(container = document) {
             container.querySelectorAll('.editable-text').forEach(el => {
                 let timer;
-                const start = (e) => { if(e.type==='mousedown' && e.button !== 0) return; timer = setTimeout(() => { el.contentEditable=true; el.focus(); document.execCommand('selectAll', false, null); }, 500); };
+                const start = (e) => { if(e.type==='mousedown' && e.button !== 0) return; timer = setTimeout(() => { el.contentEditable=true; el.focus(); }, 500); };
                 const cancel = () => clearTimeout(timer);
-                el.onmousedown = null; el.ontouchstart = null;
-                el.onmousedown = start; el.ontouchstart = start; el.onmouseup = cancel; el.onmouseleave = cancel; el.ontouchend = cancel;
-                el.oncontextmenu = (e) => { if(el.isContentEditable) return true; e.preventDefault(); return false; };
+                el.onmousedown = null; el.ontouchstart = null; el.onmousedown = start; el.ontouchstart = start; el.onmouseup = cancel; el.onmouseleave = cancel; el.ontouchend = cancel;
                 el.onblur = () => {
                     el.contentEditable = false; const txt = el.textContent.trim();
                     if(el.dataset.key) { appData[el.dataset.key] = txt; if(el.dataset.key === 'name' && activeMode === 'admin') updateRegistryName(txt); }
@@ -446,38 +400,31 @@
 
         async function updateRegistryName(newName) {
             const client = clientsRegistry.find(c => c.id === currentId);
-            if(client && client.name !== newName) {
-                client.name = newName;
-                await saveRegistry();
-            }
+            if(client && client.name !== newName) { client.name = newName; await saveRegistry(); renderClientList(); }
         }
 
         let activeServiceId = null;
         function openServiceModal(s) {
             activeServiceId = s.id;
             ['Title','Exp','Good','Bad'].forEach(f => {
-                const el = document.getElementById('modal'+f);
-                el.textContent = s[f.toLowerCase()] || (f==='Title' ? '' : '-');
-                el.dataset.sid = s.id;
+                const el = document.getElementById('modal'+f); el.textContent = s[f.toLowerCase()] || ''; el.dataset.sid = s.id;
             });
-            document.getElementById('serviceModalOverlay').classList.add('active');
-            setupLongPressEditors(document.getElementById('serviceModal'));
+            document.getElementById('serviceModalOverlay').classList.add('active'); setupLongPressEditors(document.getElementById('serviceModal'));
         }
 
         function addService() { appData.services.push({ id: Date.now(), title: 'Новая услуга', category: 'Разное', exp: 'Опишите опыт', good: 'Плюсы', bad: 'Минусы' }); renderServices(); window.scrollTo(0, document.body.scrollHeight); }
-        function deleteCurrentService() { if(confirm("Удалить услугу?")){ appData.services = appData.services.filter(s => s.id != activeServiceId); closeModal('serviceModalOverlay'); renderServices(); } }
+        function deleteService(id) { if(confirm("Удалить услугу?")){ appData.services = appData.services.filter(s => s.id != id); closeModal('serviceModalOverlay'); renderServices(); } }
         function editContacts() { appData.phone = prompt("Телефон:", appData.phone) || appData.phone; appData.tg = prompt("Telegram:", appData.tg) || appData.tg; appData.vk = prompt("ВК:", appData.vk) || appData.vk; }
 
         async function saveData() {
             if(activeMode === 'admin') {
-                showLoader("Сохранение в GitHub...");
+                showLoader("В GitHub...");
                 try {
-                    const res = await githubReq('PUT', `${currentId}/data.json`, { message: "Редакция от админа", content: utf8_to_b64(JSON.stringify(appData, null, 2)), sha: fileSha });
-                    fileSha = res.content.sha; hideLoader(); alert("Успешно сохранено!");
-                } catch(e) { hideLoader(); alert("Ошибка сохранения."); }
+                    const res = await githubReq('PUT', `${currentId}/data.json`, { message: "Правка", content: utf8_to_b64(JSON.stringify(appData, null, 2)), sha: fileSha });
+                    fileSha = res.content.sha; hideLoader(); alert("Сохранено!");
+                } catch(e) { hideLoader(); alert("Ошибка."); }
             } else {
                 const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2)); a.download = "data.json"; document.body.appendChild(a); a.click(); a.remove();
-                alert(`Файл скачан! Отправьте его владельцу системы.`);
             }
         }
     </script>
