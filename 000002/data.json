@@ -1,0 +1,23 @@
+{
+  "name": "Новый Клиент",
+  "greeting": "Добрый день",
+  "avatar": "https://placehold.co/400x400/eeeeee/999999?text=Photo",
+  "phone": "79000000000",
+  "tg": "username",
+  "vk": "id000",
+  "categories": [
+    "Бизнес",
+    "Строительство",
+    "Здоровье"
+  ],
+  "services": [
+    {
+      "id": 1,
+      "title": "Услуга",
+      "category": "Бизнес",
+      "exp": "Опыт",
+      "good": "Плюсы",
+      "bad": "Минусы"
+    }
+  ]
+}
